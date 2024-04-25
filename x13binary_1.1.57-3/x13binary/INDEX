@@ -1,0 +1,5 @@
+checkX13binary          Check if X-13ARIMA-SEATS Runs Properly
+supportedPlatform       Test Platform Support
+x13binary-package       Provide the 'X13-ARIMA-SEATS' Seasonal
+                        Adjustment Program
+x13path                 Full Path to X-13ARIMA-SEATS

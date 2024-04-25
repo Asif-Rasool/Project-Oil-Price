@@ -1,0 +1,4110 @@
+{
+ "cells": [
+  {
+   "cell_type": "markdown",
+   "id": "a79a8f63",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "# Setting up the environment"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9a59fa7c-e001-40b6-b24c-556d7f166d49",
+   "metadata": {},
+   "source": [
+    "## Setting up python and R environment, and loading python packages "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "id": "67e10904",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "R_HOME: C:\\Program Files\\R\\R-4.3.1\n",
+      "X13_PATHs: C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\x13as_html-v1-1-b60\\x13as  |  C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\x13as_html-v1-1-b60\\x13as\n",
+      "Set up RPY2\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\packages.py:367: UserWarning: The symbol 'quartz' is not in this R namespace/package.\n",
+      "  warnings.warn(\n",
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\lib\\ggplot2.py:70: UserWarning: This was designed againt ggplot2 versions starting with 3.3. but you have 3.4.2\n",
+      "  warnings.warn(\n"
+     ]
+    }
+   ],
+   "source": [
+    "import pandas as pd # load and manipulate data for One-Hot ncoding\n",
+    "import numpy as np # calculate the mean and std. dev. \n",
+    "import matplotlib.pyplot as plt # to plot figures\n",
+    "plt.style.use(\"fivethirtyeight\")\n",
+    "# !pip install --upgrade jedi==0.17.2\n",
+    "\n",
+    "## Setting up environments to run R in Jupyter\n",
+    "\n",
+    "import os\n",
+    "os.environ['R_HOME'] = r'C:\\Program Files\\R\\R-4.3.1'\n",
+    "os.environ['X13_PATH'] = r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\x13as_html-v1-1-b60\\x13as'\n",
+    "\n",
+    "x13path = None\n",
+    "x13path = r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\x13as_html-v1-1-b60\\x13as'\n",
+    "\n",
+    "r_home = os.environ.get(\"R_HOME\")\n",
+    "print('R_HOME:', r_home)\n",
+    "\n",
+    "x13_path = os.environ.get(\"X13_PATH\")\n",
+    "print('X13_PATHs:', x13_path, ' | ', x13path)\n",
+    "\n",
+    "## Setting up R\n",
+    "\n",
+    "print('Set up RPY2')\n",
+    "\n",
+    "# !pip install rpy2 --quiet\n",
+    "import rpy2\n",
+    "import rpy2.robjects as ro\n",
+    "import rpy2.rinterface as ri\n",
+    "from rpy2.robjects import r\n",
+    "\n",
+    "# Extra RPY2 items\n",
+    "\n",
+    "from rpy2.robjects.packages import importr\n",
+    "from rpy2.robjects import pandas2ri\n",
+    "from rpy2.robjects.vectors import IntVector, FloatVector\n",
+    "import rpy2.ipython.html\n",
+    "import rpy2.robjects.lib.ggplot2 as gp\n",
+    "from rpy2.ipython.ggplot import image_png\n",
+    "import rpy2.rinterface as rinterface\n",
+    "\n",
+    "#rinterface.initr()\n",
+    "pandas2ri.activate()\n",
+    "\n",
+    "%load_ext rpy2.ipython\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "34527ea2-0381-403e-b446-1e6e02d75f79",
+   "metadata": {},
+   "source": [
+    "## Loading R packages"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "id": "9a3a1f2c",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "\n",
+       "Attaching package: 'lubridate'\n",
+       "\n",
+       "The following objects are masked from 'package:base':\n",
+       "\n",
+       "    date, intersect, setdiff, union\n",
+       "\n",
+       "\n",
+       "Attaching package: 'tidyr'\n",
+       "\n",
+       "The following object is masked from 'package:reshape2':\n",
+       "\n",
+       "    smiths\n",
+       "\n",
+       "Registered S3 method overwritten by 'quantmod':\n",
+       "  method            from\n",
+       "  as.zoo.data.frame zoo \n",
+       "This is forecast 8.21 \n",
+       "  Use suppressPackageStartupMessages() to eliminate package startup messages.\n",
+       "\n",
+       "Attaching package: 'dplyr'\n",
+       "\n",
+       "The following objects are masked from 'package:stats':\n",
+       "\n",
+       "    filter, lag\n",
+       "\n",
+       "The following objects are masked from 'package:base':\n",
+       "\n",
+       "    intersect, setdiff, setequal, union\n",
+       "\n",
+       "Registered S3 methods overwritten by 'ggfortify':\n",
+       "  method                 from    \n",
+       "  autoplot.Arima         forecast\n",
+       "  autoplot.acf           forecast\n",
+       "  autoplot.ar            forecast\n",
+       "  autoplot.bats          forecast\n",
+       "  autoplot.decomposed.ts forecast\n",
+       "  autoplot.ets           forecast\n",
+       "  autoplot.forecast      forecast\n",
+       "  autoplot.stl           forecast\n",
+       "  autoplot.ts            forecast\n",
+       "  fitted.ar              forecast\n",
+       "  fortify.ts             forecast\n",
+       "  residuals.ar           forecast\n",
+       "The system variable 'X13_PATH' has been manually set to: \n",
+       "  C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\x13as_html-v1-1-b60\\x13as\n",
+       "Since version 1.2, 'seasonal' relies on the 'x13binary' \n",
+       "package and does not require 'X13_PATH' to be set anymore. \n",
+       "Only set 'X13_PATH' manually if you intend to use your own\n",
+       "binaries. See ?seasonal for details.\n",
+       "\n",
+       "Attaching package: 'seasonalview'\n",
+       "\n",
+       "The following object is masked from 'package:seasonal':\n",
+       "\n",
+       "    view\n",
+       "\n",
+       "X-13 installation test:\n",
+       "  - X13_PATH correctly specified\n",
+       "  - binary executable file found\n",
+       "  - command line test run successful\n",
+       "  - command line test produced HTML output\n",
+       "  - seasonal test run successful\n",
+       "Congratulations! 'seasonal' should work fine!\n"
+      ]
+     },
+     "metadata": {},
+     "output_type": "display_data"
+    }
+   ],
+   "source": [
+    "%%R\n",
+    "\n",
+    "# install.packages(\"seasonal\")\n",
+    "# install.packages(\"seasonalview\")\n",
+    "\n",
+    "library(reshape2)\n",
+    "library(lubridate)\n",
+    "library(tidyr)\n",
+    "library(shiny)\n",
+    "library(ggplot2)\n",
+    "library(forecast)\n",
+    "library(dplyr)\n",
+    "library(ggfortify)\n",
+    "suppressPackageStartupMessages(library(Microsoft365R))\n",
+    "suppressPackageStartupMessages(library(strucchange))\n",
+    "suppressPackageStartupMessages(library(tseries))\n",
+    "suppressPackageStartupMessages(library(openxlsx))\n",
+    "\n",
+    "## Packages to interface with x13-SEATS\n",
+    "library(seasonal)\n",
+    "library(seasonalview)\n",
+    "suppressPackageStartupMessages(library(readr))\n",
+    "## Check seasonal library\n",
+    "checkX13()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "de429c06",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "# Step 01: Preparing the dataset"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "879945a2",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the dependent variable: nm_oil_price"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5a79a127",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "id": "315c7a33",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nm_oil_price = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'nm_oil_price'))\n",
+    "nm_oil_price.rename(columns = {\"Month\": \"Date\", \"New Mexico Crude Oil First Purchase Price Dollars per Barrel\": \"nm_oil_price\"}, inplace = True)\n",
+    "nm_oil_price['Date'] = pd.to_datetime(nm_oil_price['Date'])\n",
+    "nm_oil_price = nm_oil_price.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2cd3bb6f",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "id": "ef6c1872",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "nm_oil_price = nm_oil_price.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d90bc321",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "id": "a2708a3e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            nm_oil_price\n",
+      "Date                    \n",
+      "2001-01-01     26.903333\n",
+      "2001-04-01     24.946667\n",
+      "2001-07-01     24.830000\n",
+      "2001-10-01     18.556667\n",
+      "2002-01-01     19.463333\n",
+      "...                  ...\n",
+      "2019-10-01     55.326667\n",
+      "2020-01-01     45.273333\n",
+      "2020-04-01     22.180000\n",
+      "2020-07-01     38.316667\n",
+      "2020-10-01     40.056667\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "nm_oil_price = nm_oil_price['2001-01-01' : '2020-12-31']\n",
+    "print(nm_oil_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "id": "69203f58",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date nm_oil_price_sea\n",
+      "1  2001-01-01         27.05615\n",
+      "2  2001-04-01         24.90854\n",
+      "3  2001-07-01         23.69272\n",
+      "4  2001-10-01         19.38733\n",
+      "5  2002-01-01         19.58319\n",
+      "6  2002-04-01         24.36478\n",
+      "7  2002-07-01         25.20407\n",
+      "8  2002-10-01         27.54206\n",
+      "9  2003-01-01         32.52408\n",
+      "10 2003-04-01         27.73919\n",
+      "11 2003-07-01         27.58998\n",
+      "12 2003-10-01         30.17894\n",
+      "13 2004-01-01         33.60536\n",
+      "14 2004-04-01         36.49818\n",
+      "15 2004-07-01         39.90052\n",
+      "16 2004-10-01         46.71443\n",
+      "17 2005-01-01         47.42129\n",
+      "18 2005-04-01         49.16279\n",
+      "19 2005-07-01         57.72732\n",
+      "20 2005-10-01         57.45024\n",
+      "21 2006-01-01         60.03014\n",
+      "22 2006-04-01         66.09283\n",
+      "23 2006-07-01         64.41180\n",
+      "24 2006-10-01         56.22082\n",
+      "25 2007-01-01         55.62717\n",
+      "26 2007-04-01         60.27793\n",
+      "27 2007-07-01         70.35561\n",
+      "28 2007-10-01         88.51190\n",
+      "29 2008-01-01         95.86641\n",
+      "30 2008-04-01        120.40307\n",
+      "31 2008-07-01        114.34920\n",
+      "32 2008-10-01         55.74118\n",
+      "33 2009-01-01         36.47377\n",
+      "34 2009-04-01         55.04051\n",
+      "35 2009-07-01         64.45258\n",
+      "36 2009-10-01         72.52711\n",
+      "37 2010-01-01         74.37172\n",
+      "38 2010-04-01         73.69620\n",
+      "39 2010-07-01         72.70323\n",
+      "40 2010-10-01         81.68918\n",
+      "41 2011-01-01         88.07967\n",
+      "42 2011-04-01         97.91725\n",
+      "43 2011-07-01         85.60953\n",
+      "44 2011-10-01         92.49482\n",
+      "45 2012-01-01         97.85626\n",
+      "46 2012-04-01         85.47177\n",
+      "47 2012-07-01         86.00313\n",
+      "48 2012-10-01         83.84289\n",
+      "49 2013-01-01         82.97104\n",
+      "50 2013-04-01         89.18105\n",
+      "51 2013-07-01        100.32095\n",
+      "52 2013-10-01         95.25938\n",
+      "53 2014-01-01         91.70097\n",
+      "54 2014-04-01         90.80609\n",
+      "55 2014-07-01         85.00464\n",
+      "56 2014-10-01         67.68149\n",
+      "57 2015-01-01         42.72310\n",
+      "58 2015-04-01         51.27278\n",
+      "59 2015-07-01         43.27282\n",
+      "60 2015-10-01         39.39148\n",
+      "61 2016-01-01         28.72703\n",
+      "62 2016-04-01         40.13868\n",
+      "63 2016-07-01         41.62539\n",
+      "64 2016-10-01         46.65947\n",
+      "65 2017-01-01         48.35131\n",
+      "66 2017-04-01         43.58002\n",
+      "67 2017-07-01         45.66187\n",
+      "68 2017-10-01         53.16854\n",
+      "69 2018-01-01         60.55953\n",
+      "70 2018-04-01         59.34064\n",
+      "71 2018-07-01         56.72952\n",
+      "72 2018-10-01         49.21130\n",
+      "73 2019-01-01         48.23978\n",
+      "74 2019-04-01         54.03007\n",
+      "75 2019-07-01         53.65274\n",
+      "76 2019-10-01         55.36750\n",
+      "77 2020-01-01         45.65486\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i nm_oil_price\n",
+    "\n",
+    "nm_oil_price_r <- ts(nm_oil_price, start = 2001, end = 2020, frequency =4)\n",
+    "nm_oil_price_r <-  as.data.frame(as_tibble(seas(nm_oil_price_r, x11= \"\",)))\n",
+    "nm_oil_price_r <-  nm_oil_price_r[-c(3:7)]\n",
+    "colnames(nm_oil_price_r)[1] = \"Date\"\n",
+    "colnames(nm_oil_price_r)[2] = \"nm_oil_price_sea\"\n",
+    "print(nm_oil_price_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dc9a9fd4",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: wti_spot_price\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a2b9b2ae",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "id": "78d47733",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wti_spot_price = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'wti_spot'))\n",
+    "wti_spot_price.rename(columns = {\"Month\": \"Date\", \"Cushing OK WTI Spot Price FOB Dollars per Barrel\": \"wti_spot_price\"}, inplace = True)\n",
+    "wti_spot_price['Date'] = pd.to_datetime(wti_spot_price['Date'])\n",
+    "wti_spot_price = wti_spot_price.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f6507287",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "id": "811a9467",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "wti_spot_price = wti_spot_price.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eef9b269",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "id": "f1cd2305",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            wti_spot_price\n",
+      "Date                      \n",
+      "2001-01-01       28.816667\n",
+      "2001-04-01       27.906667\n",
+      "2001-07-01       26.666667\n",
+      "2001-10-01       20.400000\n",
+      "2002-01-01       21.656667\n",
+      "...                    ...\n",
+      "2019-10-01       56.956667\n",
+      "2020-01-01       45.756667\n",
+      "2020-04-01       27.806667\n",
+      "2020-07-01       40.893333\n",
+      "2020-10-01       42.453333\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "wti_spot_price = wti_spot_price['2001-01-01' : '2020-12-31']\n",
+    "print(wti_spot_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "id": "4a15fa73",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date wti_spot_price_sea\n",
+      "1  2001-01-01           29.09335\n",
+      "2  2001-04-01           27.37471\n",
+      "3  2001-07-01           25.79932\n",
+      "4  2001-10-01           21.30867\n",
+      "5  2002-01-01           21.85854\n",
+      "6  2002-04-01           25.84293\n",
+      "7  2002-07-01           27.36636\n",
+      "8  2002-10-01           29.36868\n",
+      "9  2003-01-01           34.48232\n",
+      "10 2003-04-01           28.63779\n",
+      "11 2003-07-01           29.14776\n",
+      "12 2003-10-01           32.26040\n",
+      "13 2004-01-01           35.77804\n",
+      "14 2004-04-01           38.05399\n",
+      "15 2004-07-01           42.23989\n",
+      "16 2004-10-01           49.59363\n",
+      "17 2005-01-01           50.94022\n",
+      "18 2005-04-01           52.50280\n",
+      "19 2005-07-01           60.88438\n",
+      "20 2005-10-01           61.14442\n",
+      "21 2006-01-01           65.50298\n",
+      "22 2006-04-01           69.36467\n",
+      "23 2006-07-01           67.86684\n",
+      "24 2006-10-01           60.92056\n",
+      "25 2007-01-01           60.61315\n",
+      "26 2007-04-01           63.42974\n",
+      "27 2007-07-01           73.23829\n",
+      "28 2007-10-01           92.02749\n",
+      "29 2008-01-01          102.10635\n",
+      "30 2008-04-01          120.24263\n",
+      "31 2008-07-01          115.97438\n",
+      "32 2008-10-01           59.07048\n",
+      "33 2009-01-01           44.33063\n",
+      "34 2009-04-01           57.55630\n",
+      "35 2009-07-01           67.80590\n",
+      "36 2009-10-01           77.02754\n",
+      "37 2010-01-01           80.10861\n",
+      "38 2010-04-01           75.83130\n",
+      "39 2010-07-01           75.75060\n",
+      "40 2010-10-01           86.58996\n",
+      "41 2011-01-01           94.19208\n",
+      "42 2011-04-01          100.50303\n",
+      "43 2011-07-01           88.69082\n",
+      "44 2011-10-01           96.30750\n",
+      "45 2012-01-01          103.50006\n",
+      "46 2012-04-01           92.10332\n",
+      "47 2012-07-01           90.26966\n",
+      "48 2012-10-01           90.24229\n",
+      "49 2013-01-01           96.16874\n",
+      "50 2013-04-01           92.09027\n",
+      "51 2013-07-01          103.03500\n",
+      "52 2013-10-01           99.74454\n",
+      "53 2014-01-01          102.17257\n",
+      "54 2014-04-01          100.29942\n",
+      "55 2014-07-01           95.14782\n",
+      "56 2014-10-01           74.58867\n",
+      "57 2015-01-01           50.76013\n",
+      "58 2015-04-01           55.81704\n",
+      "59 2015-07-01           45.30061\n",
+      "60 2015-10-01           42.58785\n",
+      "61 2016-01-01           34.79490\n",
+      "62 2016-04-01           43.69492\n",
+      "63 2016-07-01           44.14935\n",
+      "64 2016-10-01           49.43660\n",
+      "65 2017-01-01           54.30738\n",
+      "66 2017-04-01           46.48899\n",
+      "67 2017-07-01           47.65969\n",
+      "68 2017-10-01           55.44721\n",
+      "69 2018-01-01           65.55702\n",
+      "70 2018-04-01           66.10304\n",
+      "71 2018-07-01           69.11156\n",
+      "72 2018-10-01           58.85667\n",
+      "73 2019-01-01           57.00663\n",
+      "74 2019-04-01           58.59348\n",
+      "75 2019-07-01           55.52486\n",
+      "76 2019-10-01           56.71869\n",
+      "77 2020-01-01           47.60156\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i wti_spot_price\n",
+    "\n",
+    "wti_spot_price_r <- ts(wti_spot_price, start = 2001, end = 2020, frequency =4)\n",
+    "wti_spot_price_r <-  as.data.frame(as_tibble(seas(wti_spot_price_r, x11= \"\",)))\n",
+    "wti_spot_price_r <-  wti_spot_price_r[-c(3:7)]\n",
+    "colnames(wti_spot_price_r)[1] = \"Date\"\n",
+    "colnames(wti_spot_price_r)[2] = \"wti_spot_price_sea\"\n",
+    "print(wti_spot_price_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "85cda430",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: brent_spot_price"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "28bf54ac",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "id": "bd54e13c",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "brent_spot_price = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'brent_spot'))\n",
+    "brent_spot_price.rename(columns = {\"Month\": \"Date\", \"Europe Brent Spot Price FOB Dollars per Barrel\": \"brent_spot_price\"}, inplace = True)\n",
+    "brent_spot_price['Date'] = pd.to_datetime(brent_spot_price['Date'])\n",
+    "brent_spot_price = brent_spot_price.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a5003c20",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "id": "9efe4cef",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "brent_spot_price = brent_spot_price.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c6870bb9",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "id": "0cb7e5a2",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            brent_spot_price\n",
+      "Date                        \n",
+      "2001-01-01         25.873333\n",
+      "2001-04-01         27.273333\n",
+      "2001-07-01         25.303333\n",
+      "2001-10-01         19.350000\n",
+      "2002-01-01         21.133333\n",
+      "...                      ...\n",
+      "2019-10-01         63.410000\n",
+      "2020-01-01         50.440000\n",
+      "2020-04-01         29.343333\n",
+      "2020-07-01         42.963333\n",
+      "2020-10-01         44.290000\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "brent_spot_price = brent_spot_price['2001-01-01' : '2020-12-31']\n",
+    "print(brent_spot_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "id": "55e93b21",
+   "metadata": {
+    "tags": []
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date brent_spot_price_sea\n",
+      "1  2001-01-01             26.41698\n",
+      "2  2001-04-01             26.41831\n",
+      "3  2001-07-01             24.48380\n",
+      "4  2001-10-01             20.25749\n",
+      "5  2002-01-01             21.55554\n",
+      "6  2002-04-01             24.37874\n",
+      "7  2002-07-01             25.96472\n",
+      "8  2002-10-01             27.96528\n",
+      "9  2003-01-01             32.12900\n",
+      "10 2003-04-01             25.61284\n",
+      "11 2003-07-01             27.34287\n",
+      "12 2003-10-01             30.61991\n",
+      "13 2004-01-01             32.62740\n",
+      "14 2004-04-01             34.80453\n",
+      "15 2004-07-01             39.70000\n",
+      "16 2004-10-01             45.78672\n",
+      "17 2005-01-01             49.08254\n",
+      "18 2005-04-01             50.52525\n",
+      "19 2005-07-01             59.10395\n",
+      "20 2005-10-01             58.61421\n",
+      "21 2006-01-01             64.05766\n",
+      "22 2006-04-01             67.65358\n",
+      "23 2006-07-01             67.19177\n",
+      "24 2006-10-01             61.30440\n",
+      "25 2007-01-01             60.19609\n",
+      "26 2007-04-01             66.16415\n",
+      "27 2007-07-01             73.03766\n",
+      "28 2007-10-01             90.72154\n",
+      "29 2008-01-01            100.71184\n",
+      "30 2008-04-01            116.53651\n",
+      "31 2008-07-01            113.00346\n",
+      "32 2008-10-01             55.76197\n",
+      "33 2009-01-01             45.74160\n",
+      "34 2009-04-01             56.38038\n",
+      "35 2009-07-01             68.19550\n",
+      "36 2009-10-01             75.90517\n",
+      "37 2010-01-01             77.36764\n",
+      "38 2010-04-01             76.24652\n",
+      "39 2010-07-01             76.97565\n",
+      "40 2010-10-01             87.87795\n",
+      "41 2011-01-01            105.39830\n",
+      "42 2011-04-01            115.33298\n",
+      "43 2011-07-01            112.86467\n",
+      "44 2011-10-01            111.31301\n",
+      "45 2012-01-01            119.01271\n",
+      "46 2012-04-01            107.03209\n",
+      "47 2012-07-01            108.28771\n",
+      "48 2012-10-01            111.84835\n",
+      "49 2013-01-01            114.39958\n",
+      "50 2013-04-01            100.71988\n",
+      "51 2013-07-01            108.31783\n",
+      "52 2013-10-01            110.88790\n",
+      "53 2014-01-01            111.23033\n",
+      "54 2014-04-01            107.14761\n",
+      "55 2014-07-01             99.84172\n",
+      "56 2014-10-01             77.32557\n",
+      "57 2015-01-01             55.92311\n",
+      "58 2015-04-01             59.97967\n",
+      "59 2015-07-01             49.29848\n",
+      "60 2015-10-01             44.03013\n",
+      "61 2016-01-01             35.03901\n",
+      "62 2016-04-01             44.07920\n",
+      "63 2016-07-01             45.28867\n",
+      "64 2016-10-01             49.33026\n",
+      "65 2017-01-01             55.93354\n",
+      "66 2017-04-01             48.03598\n",
+      "67 2017-07-01             51.89482\n",
+      "68 2017-10-01             61.32677\n",
+      "69 2018-01-01             69.38418\n",
+      "70 2018-04-01             72.39957\n",
+      "71 2018-07-01             75.29778\n",
+      "72 2018-10-01             66.84261\n",
+      "73 2019-01-01             65.72131\n",
+      "74 2019-04-01             67.32193\n",
+      "75 2019-07-01             61.88457\n",
+      "76 2019-10-01             62.29300\n",
+      "77 2020-01-01             52.72821\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i brent_spot_price\n",
+    "\n",
+    "brent_spot_price_r <- ts(brent_spot_price, start = 2001, end = 2020, frequency =4)\n",
+    "brent_spot_price_r <-  as.data.frame(as_tibble(seas(brent_spot_price_r, x11= \"\",)))\n",
+    "brent_spot_price_r <-  brent_spot_price_r[-c(3:7)]\n",
+    "colnames(brent_spot_price_r)[1] = \"Date\"\n",
+    "colnames(brent_spot_price_r)[2] = \"brent_spot_price_sea\"\n",
+    "print(brent_spot_price_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "998eadf7",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: dubai_spot_price"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "7e44ad0e",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 15,
+   "id": "99954258",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dubai_price = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'Monthly Prices', index_col=None, na_values=['NA'], usecols=\"A, D\"))\n",
+    "dubai_price = dubai_price.dropna()\n",
+    "dubai_price.rename(columns = {\"Month\": \"Date\", \"Crude oil, Dubai\": \"dubai_price\"}, inplace = True)\n",
+    "dubai_price['Date'] = pd.to_datetime(dubai_price['Date'])\n",
+    "dubai_price = dubai_price.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "a7a17644",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 16,
+   "id": "4c74ff42",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dubai_price = dubai_price.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "9348ae66",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 17,
+   "id": "59ba7c5f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "           dubai_price\n",
+      "Date                  \n",
+      "2001-01-01   23.620364\n",
+      "2001-04-01   25.095437\n",
+      "2001-07-01   23.904812\n",
+      "2001-10-01   18.238671\n",
+      "2002-01-01   20.019124\n",
+      "...                ...\n",
+      "2019-10-01       61.43\n",
+      "2020-01-01   50.673333\n",
+      "2020-04-01   31.656667\n",
+      "2020-07-01   42.483333\n",
+      "2020-10-01   43.846667\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "dubai_price = dubai_price['2001-01-01' : '2020-12-31']\n",
+    "print(dubai_price)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 18,
+   "id": "af77a25f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\pandas2ri.py:65: UserWarning: Error while trying to convert the column \"dubai_price\". Fall back to string conversion. The error is: <class 'float'>\n",
+      "  warnings.warn('Error while trying to convert '\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date dubai_price_sea\n",
+      "1  2001-01-01       20.991338\n",
+      "2  2001-04-01       24.320103\n",
+      "3  2001-07-01       19.805180\n",
+      "4  2001-10-01       18.856513\n",
+      "5  2002-01-01       20.049251\n",
+      "6  2002-04-01       21.356935\n",
+      "7  2002-07-01       24.596098\n",
+      "8  2002-10-01       25.017763\n",
+      "9  2003-01-01       30.097262\n",
+      "10 2003-04-01       22.446265\n",
+      "11 2003-07-01       25.133972\n",
+      "12 2003-10-01       29.315428\n",
+      "13 2004-01-01       31.312674\n",
+      "14 2004-04-01       32.325327\n",
+      "15 2004-07-01       32.800568\n",
+      "16 2004-10-01       35.493544\n",
+      "17 2005-01-01       38.613150\n",
+      "18 2005-04-01       42.138499\n",
+      "19 2005-07-01       50.626897\n",
+      "20 2005-10-01       51.384084\n",
+      "21 2006-01-01       58.140118\n",
+      "22 2006-04-01       62.839256\n",
+      "23 2006-07-01       63.705306\n",
+      "24 2006-10-01       56.079606\n",
+      "25 2007-01-01       56.485726\n",
+      "26 2007-04-01       63.662891\n",
+      "27 2007-07-01       68.059030\n",
+      "28 2007-10-01       78.482845\n",
+      "29 2008-01-01       82.878646\n",
+      "30 2008-04-01       15.381314\n",
+      "31 2008-07-01       13.679273\n",
+      "32 2008-10-01       52.014916\n",
+      "33 2009-01-01       44.654994\n",
+      "34 2009-04-01       55.452429\n",
+      "35 2009-07-01       68.382822\n",
+      "36 2009-10-01       74.568389\n",
+      "37 2010-01-01       78.097362\n",
+      "38 2010-04-01       75.980597\n",
+      "39 2010-07-01       72.692429\n",
+      "40 2010-10-01       78.471178\n",
+      "41 2011-01-01        2.203146\n",
+      "42 2011-04-01       13.730538\n",
+      "43 2011-07-01       10.937952\n",
+      "44 2011-10-01        5.161138\n",
+      "45 2012-01-01       16.795236\n",
+      "46 2012-04-01        7.219723\n",
+      "47 2012-07-01        7.955942\n",
+      "48 2012-10-01       11.073879\n",
+      "49 2013-01-01       13.568756\n",
+      "50 2013-04-01        2.420116\n",
+      "51 2013-07-01        9.044552\n",
+      "52 2013-10-01        8.906610\n",
+      "53 2014-01-01        4.633555\n",
+      "54 2014-04-01        5.442487\n",
+      "55 2014-07-01        2.951805\n",
+      "56 2014-10-01       72.924394\n",
+      "57 2015-01-01       49.934004\n",
+      "58 2015-04-01       60.023617\n",
+      "59 2015-07-01       46.040508\n",
+      "60 2015-10-01       34.924186\n",
+      "61 2016-01-01       32.459258\n",
+      "62 2016-04-01       38.287029\n",
+      "63 2016-07-01       40.200609\n",
+      "64 2016-10-01       42.999682\n",
+      "65 2017-01-01       52.952548\n",
+      "66 2017-04-01       43.627555\n",
+      "67 2017-07-01       47.285576\n",
+      "68 2017-10-01       57.142505\n",
+      "69 2018-01-01       65.111361\n",
+      "70 2018-04-01       69.421883\n",
+      "71 2018-07-01       72.300476\n",
+      "72 2018-10-01       66.000844\n",
+      "73 2019-01-01       64.433985\n",
+      "74 2019-04-01       66.351174\n",
+      "75 2019-07-01       59.140612\n",
+      "76 2019-10-01       59.909917\n",
+      "77 2020-01-01       50.736908\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i dubai_price\n",
+    "\n",
+    "dubai_price_r <- ts(dubai_price, start = 2001, end = 2020, frequency =4)\n",
+    "dubai_price_r <-  as.data.frame(as_tibble(seas(dubai_price_r, x11= \"\",)))\n",
+    "dubai_price_r <-  dubai_price_r[-c(3:7)]\n",
+    "colnames(dubai_price_r)[1] = \"Date\"\n",
+    "colnames(dubai_price_r)[2] = \"dubai_price_sea\"\n",
+    "print(dubai_price_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "eb172e4a",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: index_china_gdp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f7f3737a",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 19,
+   "id": "f04038fd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_china_gdp = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'index_china_gdp'))\n",
+    "index_china_gdp = index_china_gdp.dropna()\n",
+    "index_china_gdp.rename(columns = {\"observation_date\": \"Date\", \"CHNLORSGPNOSTSAM\": \"index_china_gdp\"}, inplace = True)\n",
+    "index_china_gdp['Date'] = pd.to_datetime(index_china_gdp['Date'])\n",
+    "index_china_gdp = index_china_gdp.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "daac7195",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 20,
+   "id": "03ee2079",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_china_gdp = index_china_gdp.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "50a11c7b",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 21,
+   "id": "95221c59",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_china_gdp\n",
+      "Date                       \n",
+      "2001-01-01        99.107175\n",
+      "2001-04-01        98.834079\n",
+      "2001-07-01        98.512880\n",
+      "2001-10-01        98.223037\n",
+      "2002-01-01        98.160446\n",
+      "...                     ...\n",
+      "2019-10-01        98.922686\n",
+      "2020-01-01        94.949739\n",
+      "2020-04-01       100.541369\n",
+      "2020-07-01       101.323357\n",
+      "2020-10-01       101.751979\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_china_gdp = index_china_gdp['2001-01-01' : '2020-12-31']\n",
+    "print(index_china_gdp)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 22,
+   "id": "b2fa527f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_china_gdp_sea\n",
+      "1  2001-01-01            99.11556\n",
+      "2  2001-04-01            98.84404\n",
+      "3  2001-07-01            98.52088\n",
+      "4  2001-10-01            98.19867\n",
+      "5  2002-01-01            98.16551\n",
+      "6  2002-04-01            98.40423\n",
+      "7  2002-07-01            98.70760\n",
+      "8  2002-10-01            98.97426\n",
+      "9  2003-01-01            99.23962\n",
+      "10 2003-04-01            99.48109\n",
+      "11 2003-07-01            99.87431\n",
+      "12 2003-10-01           100.28423\n",
+      "13 2004-01-01           100.51120\n",
+      "14 2004-04-01           100.33478\n",
+      "15 2004-07-01           100.08794\n",
+      "16 2004-10-01            99.90102\n",
+      "17 2005-01-01            99.81811\n",
+      "18 2005-04-01            99.86355\n",
+      "19 2005-07-01           100.00245\n",
+      "20 2005-10-01           100.10287\n",
+      "21 2006-01-01           100.16228\n",
+      "22 2006-04-01           100.22290\n",
+      "23 2006-07-01           100.31334\n",
+      "24 2006-10-01           100.53141\n",
+      "25 2007-01-01           100.83364\n",
+      "26 2007-04-01           101.14446\n",
+      "27 2007-07-01           101.45164\n",
+      "28 2007-10-01           101.65983\n",
+      "29 2008-01-01           101.50766\n",
+      "30 2008-04-01           100.85768\n",
+      "31 2008-07-01            99.72611\n",
+      "32 2008-10-01            98.57642\n",
+      "33 2009-01-01            98.10940\n",
+      "34 2009-04-01            98.49389\n",
+      "35 2009-07-01            99.17784\n",
+      "36 2009-10-01            99.72233\n",
+      "37 2010-01-01            99.94841\n",
+      "38 2010-04-01            99.97463\n",
+      "39 2010-07-01           100.01701\n",
+      "40 2010-10-01           100.25424\n",
+      "41 2011-01-01           100.59081\n",
+      "42 2011-04-01           100.85832\n",
+      "43 2011-07-01           100.95480\n",
+      "44 2011-10-01           100.88551\n",
+      "45 2012-01-01           100.71106\n",
+      "46 2012-04-01           100.53799\n",
+      "47 2012-07-01           100.42318\n",
+      "48 2012-10-01           100.39024\n",
+      "49 2013-01-01           100.41416\n",
+      "50 2013-04-01           100.48169\n",
+      "51 2013-07-01           100.57968\n",
+      "52 2013-10-01           100.65071\n",
+      "53 2014-01-01           100.66513\n",
+      "54 2014-04-01           100.63037\n",
+      "55 2014-07-01           100.54258\n",
+      "56 2014-10-01           100.40993\n",
+      "57 2015-01-01           100.24567\n",
+      "58 2015-04-01           100.07489\n",
+      "59 2015-07-01            99.92238\n",
+      "60 2015-10-01            99.79236\n",
+      "61 2016-01-01            99.67857\n",
+      "62 2016-04-01            99.58514\n",
+      "63 2016-07-01            99.53150\n",
+      "64 2016-10-01            99.51412\n",
+      "65 2017-01-01            99.52668\n",
+      "66 2017-04-01            99.54708\n",
+      "67 2017-07-01            99.55713\n",
+      "68 2017-10-01            99.52424\n",
+      "69 2018-01-01            99.44432\n",
+      "70 2018-04-01            99.32095\n",
+      "71 2018-07-01            99.18213\n",
+      "72 2018-10-01            98.99736\n",
+      "73 2019-01-01            98.78652\n",
+      "74 2019-04-01            98.61041\n",
+      "75 2019-07-01            98.62415\n",
+      "76 2019-10-01            98.94051\n",
+      "77 2020-01-01            94.95435\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_china_gdp\n",
+    "\n",
+    "index_china_gdp_r <- ts(index_china_gdp, start = 2001, end = 2020, frequency =4)\n",
+    "index_china_gdp_r <-  as.data.frame(as_tibble(seas(index_china_gdp_r, x11= \"\",)))\n",
+    "index_china_gdp_r <-  index_china_gdp_r[-c(3:7)]\n",
+    "colnames(index_china_gdp_r)[1] = \"Date\"\n",
+    "colnames(index_china_gdp_r)[2] = \"index_china_gdp_sea\"\n",
+    "print(index_china_gdp_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "b7d6a432",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: index_us_gdp"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d04711f9",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data was already in quarterly and seasonaly adjusted, so we do not need to calculate the quarterly vale. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 23,
+   "id": "9d3a2760",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_us_gdp = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'index_us_gdpdef'))\n",
+    "index_us_gdp = index_us_gdp.dropna()\n",
+    "index_us_gdp.rename(columns = {\"observation_date\": \"Date\", \"GDPDEF\": \"index_us_gdp\"}, inplace = True)\n",
+    "index_us_gdp['Date'] = pd.to_datetime(index_us_gdp['Date'])\n",
+    "index_us_gdp = index_us_gdp.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "69a20f3d",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 24,
+   "id": "4840289f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_us_gdp\n",
+      "Date                    \n",
+      "2001-01-01        79.204\n",
+      "2001-04-01        79.683\n",
+      "2001-07-01        79.996\n",
+      "2001-10-01        80.245\n",
+      "2002-01-01        80.504\n",
+      "...                  ...\n",
+      "2019-10-01       112.963\n",
+      "2020-01-01       113.418\n",
+      "2020-04-01       112.993\n",
+      "2020-07-01       113.971\n",
+      "2020-10-01       114.692\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_us_gdp = index_us_gdp['2001-01-01' : '2020-12-31']\n",
+    "print(index_us_gdp)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 25,
+   "id": "5b779d18",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_us_gdp_sea\n",
+      "1  2001-01-01         79.20260\n",
+      "2  2001-04-01         79.68367\n",
+      "3  2001-07-01         80.00731\n",
+      "4  2001-10-01         80.23500\n",
+      "5  2002-01-01         80.50204\n",
+      "6  2002-04-01         80.78383\n",
+      "7  2002-07-01         81.18218\n",
+      "8  2002-10-01         81.62917\n",
+      "9  2003-01-01         82.04377\n",
+      "10 2003-04-01         82.32851\n",
+      "11 2003-07-01         82.80239\n",
+      "12 2003-10-01         83.30083\n",
+      "13 2004-01-01         83.89540\n",
+      "14 2004-04-01         84.57006\n",
+      "15 2004-07-01         85.11079\n",
+      "16 2004-10-01         85.76674\n",
+      "17 2005-01-01         86.46058\n",
+      "18 2005-04-01         87.08495\n",
+      "19 2005-07-01         87.86119\n",
+      "20 2005-10-01         88.58243\n",
+      "21 2006-01-01         89.22227\n",
+      "22 2006-04-01         90.01196\n",
+      "23 2006-07-01         90.60284\n",
+      "24 2006-10-01         90.95783\n",
+      "25 2007-01-01         91.86257\n",
+      "26 2007-04-01         92.47185\n",
+      "27 2007-07-01         92.90080\n",
+      "28 2007-10-01         93.30958\n",
+      "29 2008-01-01         93.68398\n",
+      "30 2008-04-01         94.15580\n",
+      "31 2008-07-01         94.80579\n",
+      "32 2008-10-01         95.03738\n",
+      "33 2009-01-01         95.05473\n",
+      "34 2009-04-01         94.87801\n",
+      "35 2009-07-01         94.92157\n",
+      "36 2009-10-01         95.23565\n",
+      "37 2010-01-01         95.56186\n",
+      "38 2010-04-01         96.01951\n",
+      "39 2010-07-01         96.25224\n",
+      "40 2010-10-01         96.81030\n",
+      "41 2011-01-01         97.38827\n",
+      "42 2011-04-01         98.01040\n",
+      "43 2011-07-01         98.56458\n",
+      "44 2011-10-01         98.67834\n",
+      "45 2012-01-01         99.36630\n",
+      "46 2012-04-01         99.72630\n",
+      "47 2012-07-01        100.19088\n",
+      "48 2012-10-01        100.70543\n",
+      "49 2013-01-01        101.21409\n",
+      "50 2013-04-01        101.42598\n",
+      "51 2013-07-01        101.85881\n",
+      "52 2013-10-01        102.48984\n",
+      "53 2014-01-01        103.02557\n",
+      "54 2014-04-01        103.51099\n",
+      "55 2014-07-01        103.92765\n",
+      "56 2014-10-01        104.13090\n",
+      "57 2015-01-01        104.20559\n",
+      "58 2015-04-01        104.64018\n",
+      "59 2015-07-01        104.95230\n",
+      "60 2015-10-01        104.96617\n",
+      "61 2016-01-01        104.98627\n",
+      "62 2016-04-01        105.58061\n",
+      "63 2016-07-01        105.90573\n",
+      "64 2016-10-01        106.48485\n",
+      "65 2017-01-01        107.12140\n",
+      "66 2017-04-01        107.29813\n",
+      "67 2017-07-01        107.90498\n",
+      "68 2017-10-01        108.66167\n",
+      "69 2018-01-01        109.38214\n",
+      "70 2018-04-01        110.18354\n",
+      "71 2018-07-01        110.63601\n",
+      "72 2018-10-01        111.14673\n",
+      "73 2019-01-01        111.60949\n",
+      "74 2019-04-01        112.11006\n",
+      "75 2019-07-01        112.56346\n",
+      "76 2019-10-01        112.98044\n",
+      "77 2020-01-01        113.45993\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_us_gdp\n",
+    "\n",
+    "index_us_gdp_r <- ts(index_us_gdp, start = 2001, end = 2020, frequency =4)\n",
+    "index_us_gdp_r <-  as.data.frame(as_tibble(seas(index_us_gdp_r, x11= \"\",)))\n",
+    "index_us_gdp_r <-  index_us_gdp_r[-c(3:7)]\n",
+    "colnames(index_us_gdp_r)[1] = \"Date\"\n",
+    "colnames(index_us_gdp_r)[2] = \"index_us_gdp_sea\"\n",
+    "print(index_us_gdp_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "4655ad9c",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: volatility index: index_cboe_volt"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "92ae27dc",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data is in daily format, so we will have to calculate the quarterly mean."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 26,
+   "id": "e4bbeda7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cboe_volt = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'index_cboe_volt'))\n",
+    "index_cboe_volt = index_cboe_volt.dropna()\n",
+    "index_cboe_volt.rename(columns = {\"observation_date\": \"Date\", \"VIXCLS\": \"index_cboe_volt\"}, inplace = True)\n",
+    "index_cboe_volt['Date'] = pd.to_datetime(index_cboe_volt['Date'])\n",
+    "index_cboe_volt = index_cboe_volt.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "08702354",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from daily data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 27,
+   "id": "5c10a3e0",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cboe_volt = index_cboe_volt.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "54a1ca78",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 28,
+   "id": "828937a9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_cboe_volt\n",
+      "Date                       \n",
+      "2001-01-01        25.726452\n",
+      "2001-04-01        23.923810\n",
+      "2001-07-01        25.380339\n",
+      "2001-10-01        27.910000\n",
+      "2002-01-01        21.360833\n",
+      "...                     ...\n",
+      "2019-10-01        13.985781\n",
+      "2020-01-01        31.224516\n",
+      "2020-04-01        34.493651\n",
+      "2020-07-01        25.808906\n",
+      "2020-10-01        25.621719\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_cboe_volt = index_cboe_volt['2001-01-01' : '2020-12-31']\n",
+    "print(index_cboe_volt)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 29,
+   "id": "0b3ef269",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_cboe_volt_sea\n",
+      "1  2001-01-01            26.19564\n",
+      "2  2001-04-01            24.94348\n",
+      "3  2001-07-01            24.15561\n",
+      "4  2001-10-01            27.67326\n",
+      "5  2002-01-01            21.83541\n",
+      "6  2002-04-01            22.39988\n",
+      "7  2002-07-01            33.43775\n",
+      "8  2002-10-01            30.60404\n",
+      "9  2003-01-01            30.58269\n",
+      "10 2003-04-01            22.32176\n",
+      "11 2003-07-01            18.36945\n",
+      "12 2003-10-01            17.43396\n",
+      "13 2004-01-01            16.87748\n",
+      "14 2004-04-01            16.88744\n",
+      "15 2004-07-01            14.67479\n",
+      "16 2004-10-01            13.63388\n",
+      "17 2005-01-01            12.97453\n",
+      "18 2005-04-01            13.94032\n",
+      "19 2005-07-01            11.65100\n",
+      "20 2005-10-01            12.75138\n",
+      "21 2006-01-01            12.28447\n",
+      "22 2006-04-01            15.00239\n",
+      "23 2006-07-01            12.96771\n",
+      "24 2006-10-01            10.98010\n",
+      "25 2007-01-01            12.95039\n",
+      "26 2007-04-01            14.02855\n",
+      "27 2007-07-01            20.63680\n",
+      "28 2007-10-01            21.84065\n",
+      "29 2008-01-01            27.16848\n",
+      "30 2008-04-01            20.97597\n",
+      "31 2008-07-01            24.09921\n",
+      "32 2008-10-01            57.65302\n",
+      "33 2009-01-01            47.05348\n",
+      "34 2009-04-01            33.46202\n",
+      "35 2009-07-01            24.60634\n",
+      "36 2009-10-01            22.58075\n",
+      "37 2010-01-01            20.91946\n",
+      "38 2010-04-01            27.02324\n",
+      "39 2010-07-01            23.49105\n",
+      "40 2010-10-01            18.88730\n",
+      "41 2011-01-01            19.06540\n",
+      "42 2011-04-01            18.06054\n",
+      "43 2011-07-01            29.82421\n",
+      "44 2011-10-01            29.11395\n",
+      "45 2012-01-01            18.53116\n",
+      "46 2012-04-01            20.67972\n",
+      "47 2012-07-01            15.92548\n",
+      "48 2012-10-01            16.34860\n",
+      "49 2013-01-01            13.65108\n",
+      "50 2013-04-01            15.20967\n",
+      "51 2013-07-01            14.21238\n",
+      "52 2013-10-01            13.93156\n",
+      "53 2014-01-01            14.80444\n",
+      "54 2014-04-01            13.03980\n",
+      "55 2014-07-01            13.08027\n",
+      "56 2014-10-01            15.88352\n",
+      "57 2015-01-01            16.26790\n",
+      "58 2015-04-01            14.09200\n",
+      "59 2015-07-01            19.46143\n",
+      "60 2015-10-01            16.91081\n",
+      "61 2016-01-01            19.85119\n",
+      "62 2016-04-01            16.12931\n",
+      "63 2016-07-01            13.39820\n",
+      "64 2016-10-01            14.10198\n",
+      "65 2017-01-01            11.18156\n",
+      "66 2017-04-01            11.77438\n",
+      "67 2017-07-01            11.11321\n",
+      "68 2017-10-01            10.39000\n",
+      "69 2018-01-01            16.43997\n",
+      "70 2018-04-01            15.83939\n",
+      "71 2018-07-01            13.02313\n",
+      "72 2018-10-01            21.39924\n",
+      "73 2019-01-01            15.55151\n",
+      "74 2019-04-01            15.60708\n",
+      "75 2019-07-01            16.17653\n",
+      "76 2019-10-01            14.25600\n",
+      "77 2020-01-01            29.61483\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_cboe_volt\n",
+    "\n",
+    "index_cboe_volt_r <- ts(index_cboe_volt, start = 2001, end = 2020, frequency =4)\n",
+    "index_cboe_volt_r <-  as.data.frame(as_tibble(seas(index_cboe_volt_r, x11= \"\",)))\n",
+    "index_cboe_volt_r <-  index_cboe_volt_r[-c(3:7)]\n",
+    "colnames(index_cboe_volt_r)[1] = \"Date\"\n",
+    "colnames(index_cboe_volt_r)[2] = \"index_cboe_volt_sea\"\n",
+    "print(index_cboe_volt_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3b674697",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: us unemployment rate: us_unemploy"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "21b39e79",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data is in monthly format, so we will have to calculate the quarterly mean."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3ca5da71",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data is in monthly format, so we will have to calculate the quarterly mean."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 30,
+   "id": "21216d6d",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "us_unemploy = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'us_unemploy'))\n",
+    "us_unemploy = us_unemploy.dropna()\n",
+    "us_unemploy.rename(columns = {\"observation_date\": \"Date\", \"UNRATE\": \"us_unemploy\"}, inplace = True)\n",
+    "us_unemploy['Date'] = pd.to_datetime(us_unemploy['Date'])\n",
+    "us_unemploy = us_unemploy.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3a63f2dc",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 31,
+   "id": "e15959ba",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "us_unemploy = us_unemploy.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c91497a8",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 32,
+   "id": "05d31772",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            us_unemploy\n",
+      "Date                   \n",
+      "2001-01-01     4.233333\n",
+      "2001-04-01     4.400000\n",
+      "2001-07-01     4.833333\n",
+      "2001-10-01     5.500000\n",
+      "2002-01-01     5.700000\n",
+      "...                 ...\n",
+      "2019-10-01     3.600000\n",
+      "2020-01-01     3.800000\n",
+      "2020-04-01    12.966667\n",
+      "2020-07-01     8.833333\n",
+      "2020-10-01     6.766667\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "us_unemploy = us_unemploy['2001-01-01' : '2020-12-31']\n",
+    "print(us_unemploy)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 33,
+   "id": "5198c435",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date us_unemploy_sea\n",
+      "1  2001-01-01        4.242061\n",
+      "2  2001-04-01        4.393135\n",
+      "3  2001-07-01        4.864115\n",
+      "4  2001-10-01        5.462300\n",
+      "5  2002-01-01        5.711201\n",
+      "6  2002-04-01        5.829171\n",
+      "7  2002-07-01        5.762944\n",
+      "8  2002-10-01        5.830142\n",
+      "9  2003-01-01        5.875920\n",
+      "10 2003-04-01        6.134281\n",
+      "11 2003-07-01        6.156287\n",
+      "12 2003-10-01        5.805331\n",
+      "13 2004-01-01        5.704614\n",
+      "14 2004-04-01        5.601847\n",
+      "15 2004-07-01        5.450499\n",
+      "16 2004-10-01        5.412583\n",
+      "17 2005-01-01        5.303280\n",
+      "18 2005-04-01        5.099964\n",
+      "19 2005-07-01        4.979317\n",
+      "20 2005-10-01        4.952606\n",
+      "21 2006-01-01        4.736883\n",
+      "22 2006-04-01        4.632231\n",
+      "23 2006-07-01        4.640525\n",
+      "24 2006-10-01        4.424092\n",
+      "25 2007-01-01        4.505057\n",
+      "26 2007-04-01        4.499449\n",
+      "27 2007-07-01        4.668439\n",
+      "28 2007-10-01        4.793816\n",
+      "29 2008-01-01        5.005491\n",
+      "30 2008-04-01        5.334416\n",
+      "31 2008-07-01        5.996611\n",
+      "32 2008-10-01        6.863642\n",
+      "33 2009-01-01        8.272581\n",
+      "34 2009-04-01        9.304847\n",
+      "35 2009-07-01        9.619002\n",
+      "36 2009-10-01        9.942405\n",
+      "37 2010-01-01        9.834600\n",
+      "38 2010-04-01        9.635922\n",
+      "39 2010-07-01        9.450451\n",
+      "40 2010-10-01        9.514966\n",
+      "41 2011-01-01        9.035952\n",
+      "42 2011-04-01        9.062898\n",
+      "43 2011-07-01        8.984774\n",
+      "44 2011-10-01        8.648938\n",
+      "45 2012-01-01        8.272993\n",
+      "46 2012-04-01        8.191358\n",
+      "47 2012-07-01        8.023059\n",
+      "48 2012-10-01        7.806996\n",
+      "49 2013-01-01        7.746423\n",
+      "50 2013-04-01        7.525555\n",
+      "51 2013-07-01        7.222760\n",
+      "52 2013-10-01        6.937112\n",
+      "53 2014-01-01        6.677936\n",
+      "54 2014-04-01        6.197656\n",
+      "55 2014-07-01        6.054856\n",
+      "56 2014-10-01        5.705004\n",
+      "57 2015-01-01        5.539439\n",
+      "58 2015-04-01        5.431952\n",
+      "59 2015-07-01        5.092386\n",
+      "60 2015-10-01        5.039541\n",
+      "61 2016-01-01        4.899970\n",
+      "62 2016-04-01        4.933044\n",
+      "63 2016-07-01        4.895784\n",
+      "64 2016-10-01        4.773159\n",
+      "65 2017-01-01        4.562889\n",
+      "66 2017-04-01        4.366440\n",
+      "67 2017-07-01        4.333802\n",
+      "68 2017-10-01        4.169664\n",
+      "69 2018-01-01        4.029629\n",
+      "70 2018-04-01        3.932397\n",
+      "71 2018-07-01        3.770440\n",
+      "72 2018-10-01        3.833324\n",
+      "73 2019-01-01        3.863497\n",
+      "74 2019-04-01        3.631695\n",
+      "75 2019-07-01        3.639408\n",
+      "76 2019-10-01        3.598918\n",
+      "77 2020-01-01        3.795449\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i us_unemploy\n",
+    "\n",
+    "us_unemploy_r <- ts(us_unemploy, start = 2001, end = 2020, frequency =4)\n",
+    "us_unemploy_r <-  as.data.frame(as_tibble(seas(us_unemploy_r, x11= \"\",)))\n",
+    "us_unemploy_r <-  us_unemploy_r[-c(3:7)]\n",
+    "colnames(us_unemploy_r)[1] = \"Date\"\n",
+    "colnames(us_unemploy_r)[2] = \"us_unemploy_sea\"\n",
+    "print(us_unemploy_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3d1e61cc",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: Industrial Production: index_ip_mining \n",
+    "Mining, Quarrying, and Oil and Gas Extraction: Mining (NAICS = 21), Index 2017=100, Quarterly, Seasonally Adjusted"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c162bb2e",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data is already in quarterly format, so we will have to calculate the quarterly mean."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 34,
+   "id": "37233239",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_ip_mining = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'index_ip_mining'))\n",
+    "index_ip_mining = index_ip_mining.dropna()\n",
+    "index_ip_mining.rename(columns = {\"observation_date\": \"Date\", \"IPG21SQ\": \"index_ip_mining\"}, inplace = True)\n",
+    "index_ip_mining['Date'] = pd.to_datetime(index_ip_mining['Date'])\n",
+    "index_ip_mining = index_ip_mining.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "70f63a7d",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 35,
+   "id": "ef6050f9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_ip_mining\n",
+      "Date                       \n",
+      "2001-01-01          84.4693\n",
+      "2001-04-01          84.9047\n",
+      "2001-07-01          84.0679\n",
+      "2001-10-01          82.9672\n",
+      "2002-01-01          80.8947\n",
+      "...                     ...\n",
+      "2019-10-01         121.0686\n",
+      "2020-01-01         119.5387\n",
+      "2020-04-01          94.8394\n",
+      "2020-07-01          97.4152\n",
+      "2020-10-01          99.7417\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_ip_mining = index_ip_mining['2001-01-01' : '2020-12-31']\n",
+    "print(index_ip_mining)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 36,
+   "id": "81e4e50d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_ip_mining_sea\n",
+      "1  2001-01-01            84.35081\n",
+      "2  2001-04-01            84.75117\n",
+      "3  2001-07-01            84.18647\n",
+      "4  2001-10-01            83.13724\n",
+      "5  2002-01-01            80.76434\n",
+      "6  2002-04-01            80.52872\n",
+      "7  2002-07-01            80.26341\n",
+      "8  2002-10-01            79.40709\n",
+      "9  2003-01-01            80.32520\n",
+      "10 2003-04-01            79.68471\n",
+      "11 2003-07-01            80.56315\n",
+      "12 2003-10-01            80.79773\n",
+      "13 2004-01-01            80.52436\n",
+      "14 2004-04-01            79.77705\n",
+      "15 2004-07-01            80.25624\n",
+      "16 2004-10-01            80.44933\n",
+      "17 2005-01-01            81.32441\n",
+      "18 2005-04-01            81.10107\n",
+      "19 2005-07-01            78.07904\n",
+      "20 2005-10-01            76.69723\n",
+      "21 2006-01-01            79.83390\n",
+      "22 2006-04-01            80.86221\n",
+      "23 2006-07-01            82.12905\n",
+      "24 2006-10-01            82.11367\n",
+      "25 2007-01-01            81.05970\n",
+      "26 2007-04-01            81.74080\n",
+      "27 2007-07-01            82.16506\n",
+      "28 2007-10-01            82.54687\n",
+      "29 2008-01-01            83.02045\n",
+      "30 2008-04-01            83.72536\n",
+      "31 2008-07-01            82.59704\n",
+      "32 2008-10-01            82.69371\n",
+      "33 2009-01-01            80.54310\n",
+      "34 2009-04-01            77.42489\n",
+      "35 2009-07-01            78.90891\n",
+      "36 2009-10-01            77.96912\n",
+      "37 2010-01-01            80.33454\n",
+      "38 2010-04-01            81.58558\n",
+      "39 2010-07-01            83.64187\n",
+      "40 2010-10-01            84.30495\n",
+      "41 2011-01-01            84.40409\n",
+      "42 2011-04-01            87.05839\n",
+      "43 2011-07-01            88.20416\n",
+      "44 2011-10-01            91.20481\n",
+      "45 2012-01-01            93.56070\n",
+      "46 2012-04-01            93.91699\n",
+      "47 2012-07-01            94.77084\n",
+      "48 2012-10-01            96.69761\n",
+      "49 2013-01-01            98.15556\n",
+      "50 2013-04-01           100.06030\n",
+      "51 2013-07-01           102.23651\n",
+      "52 2013-10-01           102.02123\n",
+      "53 2014-01-01           105.96450\n",
+      "54 2014-04-01           110.94580\n",
+      "55 2014-07-01           113.45283\n",
+      "56 2014-10-01           114.69462\n",
+      "57 2015-01-01           110.85278\n",
+      "58 2015-04-01           104.63187\n",
+      "59 2015-07-01           103.79012\n",
+      "60 2015-10-01            99.17456\n",
+      "61 2016-01-01            94.47619\n",
+      "62 2016-04-01            89.98449\n",
+      "63 2016-07-01            89.72619\n",
+      "64 2016-10-01            91.87607\n",
+      "65 2017-01-01            96.24263\n",
+      "66 2017-04-01            99.86065\n",
+      "67 2017-07-01           100.30015\n",
+      "68 2017-10-01           103.54944\n",
+      "69 2018-01-01           107.07736\n",
+      "70 2018-04-01           111.50448\n",
+      "71 2018-07-01           116.13662\n",
+      "72 2018-10-01           118.60652\n",
+      "73 2019-01-01           119.35570\n",
+      "74 2019-04-01           121.66578\n",
+      "75 2019-07-01           121.41876\n",
+      "76 2019-10-01           120.71996\n",
+      "77 2020-01-01           120.05734\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_ip_mining\n",
+    "\n",
+    "index_ip_mining_r <- ts(index_ip_mining, start = 2001, end = 2020, frequency =4)\n",
+    "index_ip_mining_r <-  as.data.frame(as_tibble(seas(index_ip_mining_r, x11= \"\",)))\n",
+    "index_ip_mining_r <-  index_ip_mining_r[-c(3:7)]\n",
+    "colnames(index_ip_mining_r)[1] = \"Date\"\n",
+    "colnames(index_ip_mining_r)[2] = \"index_ip_mining_sea\"\n",
+    "print(index_ip_mining_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "f532b7ac",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors: Consumer Price Index for China: index_cpi_china "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "5df2b7b5",
+   "metadata": {},
+   "source": [
+    "### - Loading the data\n",
+    "This data is in monthly format, so we calculate the quarterly mean."
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 37,
+   "id": "5cbcade7",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cpi_china = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'index_cpi_china'))\n",
+    "index_cpi_china = index_cpi_china.dropna()\n",
+    "index_cpi_china.rename(columns = {\"observation_date\": \"Date\", \"CPALTT01CNM659N\": \"index_cpi_china\"}, inplace = True)\n",
+    "index_cpi_china['Date'] = pd.to_datetime(index_cpi_china['Date'])\n",
+    "index_cpi_china = index_cpi_china.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "708a32f1",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 38,
+   "id": "d278be88",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cpi_china = index_cpi_china.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "98db7129",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 39,
+   "id": "c7ffc680",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_cpi_china\n",
+      "Date                       \n",
+      "2001-01-01         0.666667\n",
+      "2001-04-01         1.566667\n",
+      "2001-07-01         0.800000\n",
+      "2001-10-01        -0.133333\n",
+      "2002-01-01        -0.600000\n",
+      "...                     ...\n",
+      "2019-10-01         4.266667\n",
+      "2020-01-01         4.966667\n",
+      "2020-04-01         2.733333\n",
+      "2020-07-01         2.266667\n",
+      "2020-10-01         0.066667\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_cpi_china = index_cpi_china['2001-01-01' : '2020-12-31']\n",
+    "print(index_cpi_china)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 40,
+   "id": "0b508f40",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_cpi_china_sea\n",
+      "1  2001-01-01           0.5746011\n",
+      "2  2001-04-01           1.3863551\n",
+      "3  2001-07-01           0.8568900\n",
+      "4  2001-10-01           0.0870115\n",
+      "5  2002-01-01          -0.7051113\n",
+      "6  2002-04-01          -1.2297431\n",
+      "7  2002-07-01          -0.7136098\n",
+      "8  2002-10-01          -0.4198440\n",
+      "9  2003-01-01           0.3759613\n",
+      "10 2003-04-01           0.5398948\n",
+      "11 2003-07-01           0.8834778\n",
+      "12 2003-10-01           2.8562859\n",
+      "13 2004-01-01           2.6347685\n",
+      "14 2004-04-01           4.3011753\n",
+      "15 2004-07-01           5.3383873\n",
+      "16 2004-10-01           3.2971963\n",
+      "17 2005-01-01           2.7271087\n",
+      "18 2005-04-01           1.6438012\n",
+      "19 2005-07-01           1.4220021\n",
+      "20 2005-10-01           1.4344548\n",
+      "21 2006-01-01           1.1404577\n",
+      "22 2006-04-01           1.2712427\n",
+      "23 2006-07-01           1.3925657\n",
+      "24 2006-10-01           2.0196408\n",
+      "25 2007-01-01           2.7180095\n",
+      "26 2007-04-01           3.5067575\n",
+      "27 2007-07-01           6.2569852\n",
+      "28 2007-10-01           6.5473635\n",
+      "29 2008-01-01           8.0480470\n",
+      "30 2008-04-01           7.6902493\n",
+      "31 2008-07-01           5.4448986\n",
+      "32 2008-10-01           2.3929740\n",
+      "33 2009-01-01          -0.5677914\n",
+      "34 2009-04-01          -1.5957741\n",
+      "35 2009-07-01          -1.0871903\n",
+      "36 2009-10-01           0.5056887\n",
+      "37 2010-01-01           2.2306418\n",
+      "38 2010-04-01           2.9069604\n",
+      "39 2010-07-01           3.6210195\n",
+      "40 2010-10-01           4.5379451\n",
+      "41 2011-01-01           5.0915662\n",
+      "42 2011-04-01           5.7360296\n",
+      "43 2011-07-01           6.3853513\n",
+      "44 2011-10-01           4.4487605\n",
+      "45 2012-01-01           3.7992876\n",
+      "46 2012-04-01           2.8946329\n",
+      "47 2012-07-01           1.9557210\n",
+      "48 2012-10-01           1.9581441\n",
+      "49 2013-01-01           2.4687994\n",
+      "50 2013-04-01           2.4282096\n",
+      "51 2013-07-01           2.8157482\n",
+      "52 2013-10-01           2.8239664\n",
+      "53 2014-01-01           2.3416368\n",
+      "54 2014-04-01           2.2315467\n",
+      "55 2014-07-01           1.9485539\n",
+      "56 2014-10-01           1.4537314\n",
+      "57 2015-01-01           1.2281421\n",
+      "58 2015-04-01           1.4115100\n",
+      "59 2015-07-01           1.7015615\n",
+      "60 2015-10-01           1.4224782\n",
+      "61 2016-01-01           2.1649598\n",
+      "62 2016-04-01           2.1137260\n",
+      "63 2016-07-01           1.6334314\n",
+      "64 2016-10-01           2.1243735\n",
+      "65 2017-01-01           1.4245960\n",
+      "66 2017-04-01           1.4445387\n",
+      "67 2017-07-01           1.5801292\n",
+      "68 2017-10-01           1.7538274\n",
+      "69 2018-01-01           2.1863548\n",
+      "70 2018-04-01           1.8727716\n",
+      "71 2018-07-01           2.2893248\n",
+      "72 2018-10-01           2.1626879\n",
+      "73 2019-01-01           1.8341709\n",
+      "74 2019-04-01           2.6815525\n",
+      "75 2019-07-01           2.8479684\n",
+      "76 2019-10-01           4.2404224\n",
+      "77 2020-01-01           4.9633450\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_cpi_china\n",
+    "\n",
+    "index_cpi_china_r <- ts(index_cpi_china, start = 2001, end = 2020, frequency =4)\n",
+    "index_cpi_china_r <-  as.data.frame(as_tibble(seas(index_cpi_china_r, x11= \"\",)))\n",
+    "index_cpi_china_r <-  index_cpi_china_r[-c(3:7)]\n",
+    "colnames(index_cpi_china_r)[1] = \"Date\"\n",
+    "colnames(index_cpi_china_r)[2] = \"index_cpi_china_sea\"\n",
+    "print(index_cpi_china_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "d8b62fac",
+   "metadata": {},
+   "source": [
+    "## Preprocessing 2 predictors at once: \n",
+    "opec supply - opec, non-opec supply- non_opec\n",
+    "This data is in quarterly format. "
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 41,
+   "id": "68e718e4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "two_x = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'two_x', usecols=\"A:C\"))\n",
+    "two_x = two_x.dropna()\n",
+    "two_x.rename(columns = {\"obs\": \"Date\", \"OPEC\": \"opec\", \"NOPEC\" : \"non_opec\"}, inplace = True)\n",
+    "two_x['Date'] = pd.to_datetime(two_x['Date'], format=\"mixed\")\n",
+    "two_x = two_x.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2d0c63e3",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 42,
+   "id": "f02b0450",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "                    opec      non_opec\n",
+      "Date                                  \n",
+      "2001-01-01  29031.181000  40054.029000\n",
+      "2001-04-01  27976.069000  39483.162667\n",
+      "2001-07-01  28140.325000  39950.500667\n",
+      "2001-10-01  27307.658667  40521.307667\n",
+      "2002-01-01  26221.237000  40685.595667\n",
+      "...                  ...           ...\n",
+      "2019-10-01  29601.000000  58779.000000\n",
+      "2020-01-01  28246.000000  59931.000000\n",
+      "2020-04-01  25578.000000  54756.000000\n",
+      "2020-07-01  23842.000000  55134.000000\n",
+      "2020-10-01  24945.000000  55800.000000\n",
+      "\n",
+      "[80 rows x 2 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "two_x = two_x['2001-01-01' : '2020-12-31']\n",
+    "print(two_x)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 43,
+   "id": "3647cc5a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date opec_sea\n",
+      "1  2001-01-01 29014.43\n",
+      "2  2001-04-01 28384.33\n",
+      "3  2001-07-01 27959.03\n",
+      "4  2001-10-01 27098.50\n",
+      "5  2002-01-01 26212.01\n",
+      "6  2002-04-01 26075.61\n",
+      "7  2002-07-01 26353.96\n",
+      "8  2002-10-01 27097.90\n",
+      "9  2003-01-01 27595.49\n",
+      "10 2003-04-01 27795.62\n",
+      "11 2003-07-01 27399.80\n",
+      "12 2003-10-01 28756.60\n",
+      "13 2004-01-01 29598.88\n",
+      "14 2004-04-01 30034.32\n",
+      "15 2004-07-01 30736.52\n",
+      "16 2004-10-01 30881.80\n",
+      "17 2005-01-01 31434.75\n",
+      "18 2005-04-01 31912.04\n",
+      "19 2005-07-01 31867.56\n",
+      "20 2005-10-01 31843.63\n",
+      "21 2006-01-01 31659.14\n",
+      "22 2006-04-01 31579.24\n",
+      "23 2006-07-01 31578.09\n",
+      "24 2006-10-01 31083.37\n",
+      "25 2007-01-01 30822.07\n",
+      "26 2007-04-01 30963.72\n",
+      "27 2007-07-01 30909.29\n",
+      "28 2007-10-01 31857.81\n",
+      "29 2008-01-01 32603.15\n",
+      "30 2008-04-01 32695.57\n",
+      "31 2008-07-01 32595.95\n",
+      "32 2008-10-01 31846.53\n",
+      "33 2009-01-01 30351.86\n",
+      "34 2009-04-01 30481.84\n",
+      "35 2009-07-01 30501.81\n",
+      "36 2009-10-01 30755.03\n",
+      "37 2010-01-01 31128.12\n",
+      "38 2010-04-01 31553.31\n",
+      "39 2010-07-01 31624.34\n",
+      "40 2010-10-01 31730.74\n",
+      "41 2011-01-01 31894.43\n",
+      "42 2011-04-01 31261.00\n",
+      "43 2011-07-01 31658.00\n",
+      "44 2011-10-01 32330.42\n",
+      "45 2012-01-01 33243.41\n",
+      "46 2012-04-01 33229.84\n",
+      "47 2012-07-01 32725.38\n",
+      "48 2012-10-01 32315.64\n",
+      "49 2013-01-01 31845.19\n",
+      "50 2013-04-01 32084.34\n",
+      "51 2013-07-01 31810.81\n",
+      "52 2013-10-01 30672.30\n",
+      "53 2014-01-01 30104.13\n",
+      "54 2014-04-01 29795.13\n",
+      "55 2014-07-01 29949.90\n",
+      "56 2014-10-01 30238.12\n",
+      "57 2015-01-01 30606.21\n",
+      "58 2015-04-01 31244.72\n",
+      "59 2015-07-01 31255.03\n",
+      "60 2015-10-01 32151.39\n",
+      "61 2016-01-01 32800.83\n",
+      "62 2016-04-01 32862.07\n",
+      "63 2016-07-01 33020.77\n",
+      "64 2016-10-01 32991.34\n",
+      "65 2017-01-01 32393.62\n",
+      "66 2017-04-01 32430.57\n",
+      "67 2017-07-01 32454.44\n",
+      "68 2017-10-01 32261.99\n",
+      "69 2018-01-01 32688.90\n",
+      "70 2018-04-01 32378.47\n",
+      "71 2018-07-01 32302.83\n",
+      "72 2018-10-01 31869.82\n",
+      "73 2019-01-01 30770.40\n",
+      "74 2019-04-01 30188.02\n",
+      "75 2019-07-01 29117.56\n",
+      "76 2019-10-01 29365.12\n",
+      "77 2020-01-01 28537.70\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i two_x\n",
+    "two_x_opec_r <- two_x[1]\n",
+    "two_x_opec_r <- ts(two_x_opec_r, start = 2001, end = 2020, frequency =4)\n",
+    "two_x_opec_r <-  as.data.frame(as_tibble(seas(two_x_opec_r, x11= \"\",)))\n",
+    "two_x_opec_r <-  two_x_opec_r[-c(3:7)]\n",
+    "colnames(two_x_opec_r)[1] = \"Date\"\n",
+    "colnames(two_x_opec_r)[2] = \"opec_sea\"\n",
+    "print(two_x_opec_r)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 44,
+   "id": "a71899df",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date non_opec_sea\n",
+      "1  2001-01-01     39879.50\n",
+      "2  2001-04-01     39625.16\n",
+      "3  2001-07-01     40144.63\n",
+      "4  2001-10-01     40354.48\n",
+      "5  2002-01-01     40519.73\n",
+      "6  2002-04-01     41034.69\n",
+      "7  2002-07-01     40822.33\n",
+      "8  2002-10-01     40927.07\n",
+      "9  2003-01-01     41162.96\n",
+      "10 2003-04-01     41058.20\n",
+      "11 2003-07-01     41644.03\n",
+      "12 2003-10-01     42048.77\n",
+      "13 2004-01-01     42000.55\n",
+      "14 2004-04-01     42309.99\n",
+      "15 2004-07-01     42194.89\n",
+      "16 2004-10-01     42104.40\n",
+      "17 2005-01-01     41889.12\n",
+      "18 2005-04-01     42368.28\n",
+      "19 2005-07-01     41654.60\n",
+      "20 2005-10-01     41615.59\n",
+      "21 2006-01-01     41651.45\n",
+      "22 2006-04-01     41663.34\n",
+      "23 2006-07-01     41951.58\n",
+      "24 2006-10-01     41909.35\n",
+      "25 2007-01-01     41911.16\n",
+      "26 2007-04-01     41858.03\n",
+      "27 2007-07-01     41676.42\n",
+      "28 2007-10-01     41490.51\n",
+      "29 2008-01-01     41383.67\n",
+      "30 2008-04-01     41404.77\n",
+      "31 2008-07-01     41065.98\n",
+      "32 2008-10-01     41194.67\n",
+      "33 2009-01-01     41431.44\n",
+      "34 2009-04-01     41622.18\n",
+      "35 2009-07-01     42059.79\n",
+      "36 2009-10-01     42023.98\n",
+      "37 2010-01-01     42222.38\n",
+      "38 2010-04-01     42566.83\n",
+      "39 2010-07-01     42652.26\n",
+      "40 2010-10-01     42796.14\n",
+      "41 2011-01-01     42469.49\n",
+      "42 2011-04-01     42162.81\n",
+      "43 2011-07-01     42223.63\n",
+      "44 2011-10-01     42580.21\n",
+      "45 2012-01-01     42613.07\n",
+      "46 2012-04-01     42590.63\n",
+      "47 2012-07-01     42408.26\n",
+      "48 2012-10-01     43344.45\n",
+      "49 2013-01-01     48119.44\n",
+      "50 2013-04-01     48525.43\n",
+      "51 2013-07-01     49073.17\n",
+      "52 2013-10-01     49100.97\n",
+      "53 2014-01-01     49684.73\n",
+      "54 2014-04-01     50419.73\n",
+      "55 2014-07-01     50532.55\n",
+      "56 2014-10-01     50765.64\n",
+      "57 2015-01-01     51761.68\n",
+      "58 2015-04-01     52051.45\n",
+      "59 2015-07-01     51875.26\n",
+      "60 2015-10-01     51351.16\n",
+      "61 2016-01-01     50974.25\n",
+      "62 2016-04-01     50216.61\n",
+      "63 2016-07-01     50378.01\n",
+      "64 2016-10-01     50716.99\n",
+      "65 2017-01-01     49763.86\n",
+      "66 2017-04-01     50008.28\n",
+      "67 2017-07-01     49931.70\n",
+      "68 2017-10-01     50493.10\n",
+      "69 2018-01-01     52952.31\n",
+      "70 2018-04-01     53760.03\n",
+      "71 2018-07-01     54634.13\n",
+      "72 2018-10-01     54725.71\n",
+      "73 2019-01-01     57178.95\n",
+      "74 2019-04-01     57681.81\n",
+      "75 2019-07-01     58026.31\n",
+      "76 2019-10-01     58569.10\n",
+      "77 2020-01-01     59686.89\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i two_x\n",
+    "two_x_non_opec_r <- two_x[2]\n",
+    "two_x_non_opec_r <- ts(two_x_non_opec_r, start = 2001, end = 2020, frequency =4)\n",
+    "two_x_non_opec_r <-  as.data.frame(as_tibble(seas(two_x_non_opec_r, x11= \"\",)))\n",
+    "two_x_non_opec_r <-  two_x_non_opec_r[-c(3:7)]\n",
+    "colnames(two_x_non_opec_r)[1] = \"Date\"\n",
+    "colnames(two_x_non_opec_r)[2] = \"non_opec_sea\"\n",
+    "print(two_x_non_opec_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "e5fc62bf",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors CPI US: index_cpi_us \n",
+    "This data is in monthly format. We calculated the quarterly mean. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c4a8ba90",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 45,
+   "id": "bf5923bd",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cpi_us  = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'cpi_us'))\n",
+    "index_cpi_us  = index_cpi_us.dropna()\n",
+    "index_cpi_us.rename(columns = {\"observation_date\": \"Date\", \"CPALTT01USM657N\": \"index_cpi_us\",}, inplace = True)\n",
+    "index_cpi_us ['Date'] = pd.to_datetime(index_cpi_us['Date'])\n",
+    "index_cpi_us = index_cpi_us.set_index('Date')"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "50937e2e",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 46,
+   "id": "fde1ff05",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "index_cpi_us = index_cpi_us.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "41ec21de",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 47,
+   "id": "a4c9dd03",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            index_cpi_us\n",
+      "Date                    \n",
+      "2001-01-01      0.419829\n",
+      "2001-04-01      0.339444\n",
+      "2001-07-01      0.056602\n",
+      "2001-10-01     -0.299975\n",
+      "2002-01-01      0.394686\n",
+      "...                  ...\n",
+      "2019-10-01      0.028006\n",
+      "2020-01-01      0.148131\n",
+      "2020-04-01     -0.039846\n",
+      "2020-07-01      0.320140\n",
+      "2020-10-01      0.024860\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "index_cpi_us = index_cpi_us['2001-01-01' : '2020-12-31']\n",
+    "print(index_cpi_us)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 48,
+   "id": "3e2b9464",
+   "metadata": {
+    "scrolled": true
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_cpi_us_sea\n",
+      "1  2001-01-01      0.096895140\n",
+      "2  2001-04-01      0.236519813\n",
+      "3  2001-07-01      0.167365146\n",
+      "4  2001-10-01      0.015057273\n",
+      "5  2002-01-01      0.072269588\n",
+      "6  2002-04-01      0.099995586\n",
+      "7  2002-07-01      0.315313765\n",
+      "8  2002-10-01      0.301490659\n",
+      "9  2003-01-01      0.278182371\n",
+      "10 2003-04-01     -0.203655508\n",
+      "11 2003-07-01      0.393022866\n",
+      "12 2003-10-01      0.162687581\n",
+      "13 2004-01-01      0.226511953\n",
+      "14 2004-04-01      0.278234602\n",
+      "15 2004-07-01      0.175486730\n",
+      "16 2004-10-01      0.397486393\n",
+      "17 2005-01-01      0.191183616\n",
+      "18 2005-04-01      0.051471377\n",
+      "19 2005-07-01      0.905657194\n",
+      "20 2005-10-01     -0.023912935\n",
+      "21 2006-01-01      0.184195635\n",
+      "22 2006-04-01      0.337661247\n",
+      "23 2006-07-01      0.198926569\n",
+      "24 2006-10-01      0.110615276\n",
+      "25 2007-01-01      0.277188814\n",
+      "26 2007-04-01      0.299061984\n",
+      "27 2007-07-01      0.233840552\n",
+      "28 2007-10-01      0.512156396\n",
+      "29 2008-01-01      0.259242045\n",
+      "30 2008-04-01      0.646379859\n",
+      "31 2008-07-01      0.200014565\n",
+      "32 2008-10-01     -1.074532192\n",
+      "33 2009-01-01      0.108312933\n",
+      "34 2009-04-01      0.321581206\n",
+      "35 2009-07-01      0.220705171\n",
+      "36 2009-10-01      0.238881059\n",
+      "37 2010-01-01     -0.026653350\n",
+      "38 2010-04-01     -0.055403571\n",
+      "39 2010-07-01      0.205196448\n",
+      "40 2010-10-01      0.374787875\n",
+      "41 2011-01-01      0.354007132\n",
+      "42 2011-04-01      0.255862509\n",
+      "43 2011-07-01      0.259577462\n",
+      "44 2011-10-01      0.117855663\n",
+      "45 2012-01-01      0.245412512\n",
+      "46 2012-04-01     -0.065896516\n",
+      "47 2012-07-01      0.344856093\n",
+      "48 2012-10-01      0.059632955\n",
+      "49 2013-01-01      0.167602902\n",
+      "50 2013-04-01      0.002326675\n",
+      "51 2013-07-01      0.157102086\n",
+      "52 2013-10-01      0.168198810\n",
+      "53 2014-01-01      0.193222495\n",
+      "54 2014-04-01      0.158249800\n",
+      "55 2014-07-01      0.031531359\n",
+      "56 2014-10-01     -0.143923455\n",
+      "57 2015-01-01     -0.049783272\n",
+      "58 2015-04-01      0.202859230\n",
+      "59 2015-07-01     -0.012806870\n",
+      "60 2015-10-01      0.087920616\n",
+      "61 2016-01-01      0.013785139\n",
+      "62 2016-04-01      0.247856543\n",
+      "63 2016-07-01      0.144268824\n",
+      "64 2016-10-01      0.262384414\n",
+      "65 2017-01-01      0.133896818\n",
+      "66 2017-04-01      0.007415421\n",
+      "67 2017-07-01      0.340872359\n",
+      "68 2017-10-01      0.204866623\n",
+      "69 2018-01-01      0.218247046\n",
+      "70 2018-04-01      0.194527651\n",
+      "71 2018-07-01      0.137132587\n",
+      "72 2018-10-01      0.076143614\n",
+      "73 2019-01-01      0.204249201\n",
+      "74 2019-04-01      0.137086610\n",
+      "75 2019-07-01      0.148864650\n",
+      "76 2019-10-01      0.265119217\n",
+      "77 2020-01-01     -0.044480371\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i index_cpi_us\n",
+    "\n",
+    "index_cpi_us_r <- ts(index_cpi_us, start = 2001, end = 2020, frequency =4)\n",
+    "index_cpi_us_r <-  as.data.frame(as_tibble(seas(index_cpi_us_r, x11= \"\",)))\n",
+    "index_cpi_us_r <-  index_cpi_us_r[-c(3:7)]\n",
+    "colnames(index_cpi_us_r)[1] = \"Date\"\n",
+    "colnames(index_cpi_us_r)[2] = \"index_cpi_us_sea\"\n",
+    "print(index_cpi_us_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "59b38063",
+   "metadata": {},
+   "source": [
+    "## Preprocessing 3 predictors at once: \n",
+    "Global energy index - index_energy, metal and minerals index- index_metal, precious metal index - index_precious\n",
+    "This data is in monthly format format, so we calculate the quarterly means. "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "3fe030ff",
+   "metadata": {},
+   "source": [
+    "### - Loading the data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 49,
+   "id": "a415a95a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "three_x = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'monthly_indices'))\n",
+    "three_x = three_x.dropna()\n",
+    "three_x['Date'] = pd.to_datetime(three_x['Date'])\n",
+    "three_x = three_x.set_index('Date')\n",
+    "three_x.rename(columns = {\"Energy\": \"index_energy\", \"Metals  & Minerals\": \"index_metal\", \"Precious Metals\" : \"index_precious\"}, inplace = True)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "c991f375",
+   "metadata": {},
+   "source": [
+    "### - Finding quarterly average from monthly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 50,
+   "id": "44341374",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "three_x = three_x.resample('QS').mean()"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "2f5e94c2",
+   "metadata": {},
+   "source": [
+    "### - Creating a sample of twenty years period"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 51,
+   "id": "9d66d36c",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "           index_energy index_metal index_precious\n",
+      "Date                                              \n",
+      "2001-01-01    39.908913   37.514824      22.225362\n",
+      "2001-04-01    38.847583   35.850699       22.34024\n",
+      "2001-07-01    34.247092   32.716238      22.427525\n",
+      "2001-10-01    27.180842     31.4506      22.616555\n",
+      "2002-01-01     28.92824   33.278799       23.65152\n",
+      "...                 ...         ...            ...\n",
+      "2019-10-01    76.123328   76.714211     112.223609\n",
+      "2020-01-01    61.671272   73.141657     118.290424\n",
+      "2020-04-01    39.800782   69.078851     125.604389\n",
+      "2020-07-01    52.373436    82.56187     146.293461\n",
+      "2020-10-01    56.889765   91.807639     143.954707\n",
+      "\n",
+      "[80 rows x 3 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "three_x = three_x['2001-01-01' : '2020-12-31']\n",
+    "print(three_x)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 52,
+   "id": "c291a761",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\pandas2ri.py:65: UserWarning: Error while trying to convert the column \"index_energy\". Fall back to string conversion. The error is: <class 'float'>\n",
+      "  warnings.warn('Error while trying to convert '\n",
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\pandas2ri.py:65: UserWarning: Error while trying to convert the column \"index_metal\". Fall back to string conversion. The error is: <class 'float'>\n",
+      "  warnings.warn('Error while trying to convert '\n",
+      "C:\\Users\\asifr\\AppData\\Local\\anaconda3\\Lib\\site-packages\\rpy2\\robjects\\pandas2ri.py:65: UserWarning: Error while trying to convert the column \"index_precious\". Fall back to string conversion. The error is: <class 'float'>\n",
+      "  warnings.warn('Error while trying to convert '\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_energy_sea\n",
+      "1  2001-01-01        29.431551\n",
+      "2  2001-04-01        27.985706\n",
+      "3  2001-07-01        23.951746\n",
+      "4  2001-10-01        21.642637\n",
+      "5  2002-01-01        21.382668\n",
+      "6  2002-04-01        23.155462\n",
+      "7  2002-07-01        24.727300\n",
+      "8  2002-10-01        26.607639\n",
+      "9  2003-01-01        33.627127\n",
+      "10 2003-04-01        27.352981\n",
+      "11 2003-07-01        30.014716\n",
+      "12 2003-10-01        32.677113\n",
+      "13 2004-01-01        35.596507\n",
+      "14 2004-04-01        35.989655\n",
+      "15 2004-07-01        36.988885\n",
+      "16 2004-10-01        43.999342\n",
+      "17 2005-01-01        50.082885\n",
+      "18 2005-04-01        52.149043\n",
+      "19 2005-07-01        64.856017\n",
+      "20 2005-10-01        65.488710\n",
+      "21 2006-01-01        66.750203\n",
+      "22 2006-04-01        68.757728\n",
+      "23 2006-07-01        66.460988\n",
+      "24 2006-10-01        61.783213\n",
+      "25 2007-01-01        63.561544\n",
+      "26 2007-04-01        69.103736\n",
+      "27 2007-07-01        73.624299\n",
+      "28 2007-10-01         3.668927\n",
+      "29 2008-01-01         8.373140\n",
+      "30 2008-04-01        17.156597\n",
+      "31 2008-07-01        16.364321\n",
+      "32 2008-10-01        63.349483\n",
+      "33 2009-01-01        49.273175\n",
+      "34 2009-04-01        52.894421\n",
+      "35 2009-07-01        65.180843\n",
+      "36 2009-10-01        75.146414\n",
+      "37 2010-01-01        80.857388\n",
+      "38 2010-04-01        78.429463\n",
+      "39 2010-07-01        77.278573\n",
+      "40 2010-10-01         1.905374\n",
+      "41 2011-01-01         6.674695\n",
+      "42 2011-04-01        16.820239\n",
+      "43 2011-07-01        16.122842\n",
+      "44 2011-10-01        13.744117\n",
+      "45 2012-01-01        16.844205\n",
+      "46 2012-04-01         5.996005\n",
+      "47 2012-07-01         8.766281\n",
+      "48 2012-10-01        14.470239\n",
+      "49 2013-01-01        14.848780\n",
+      "50 2013-04-01         3.655403\n",
+      "51 2013-07-01        11.993761\n",
+      "52 2013-10-01        10.462674\n",
+      "53 2014-01-01         9.364455\n",
+      "54 2014-04-01         9.807528\n",
+      "55 2014-07-01         4.349079\n",
+      "56 2014-10-01        76.382960\n",
+      "57 2015-01-01        52.721283\n",
+      "58 2015-04-01        54.541897\n",
+      "59 2015-07-01        46.309647\n",
+      "60 2015-10-01        38.284350\n",
+      "61 2016-01-01        33.700423\n",
+      "62 2016-04-01        38.141862\n",
+      "63 2016-07-01        42.899679\n",
+      "64 2016-10-01        49.037311\n",
+      "65 2017-01-01        51.541945\n",
+      "66 2017-04-01        46.175143\n",
+      "67 2017-07-01        50.213510\n",
+      "68 2017-10-01        57.568440\n",
+      "69 2018-01-01        67.147511\n",
+      "70 2018-04-01        72.533799\n",
+      "71 2018-07-01        74.611434\n",
+      "72 2018-10-01        68.213804\n",
+      "73 2019-01-01        62.980573\n",
+      "74 2019-04-01        64.345841\n",
+      "75 2019-07-01        53.420628\n",
+      "76 2019-10-01        54.882396\n",
+      "77 2020-01-01        46.649753\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i three_x\n",
+    "\n",
+    "three_x_index_energy_r <- three_x[1]\n",
+    "three_x_index_energy_r <- ts(three_x_index_energy_r, start = 2001, end = 2020, frequency =4)\n",
+    "three_x_index_energy_r <-  as.data.frame(as_tibble(seas(three_x_index_energy_r, x11= \"\",)))\n",
+    "three_x_index_energy_r <-  three_x_index_energy_r[-c(3:7)]\n",
+    "colnames(three_x_index_energy_r)[1] = \"Date\"\n",
+    "colnames(three_x_index_energy_r)[2] = \"index_energy_sea\"\n",
+    "print(three_x_index_energy_r)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 53,
+   "id": "5a8f7307",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_metal_sea\n",
+      "1  2001-01-01      22.2573958\n",
+      "2  2001-04-01      22.2010488\n",
+      "3  2001-07-01      16.9887407\n",
+      "4  2001-10-01      14.5232153\n",
+      "5  2002-01-01      16.2559967\n",
+      "6  2002-04-01      19.3102584\n",
+      "7  2002-07-01      15.9198290\n",
+      "8  2002-10-01      17.4400953\n",
+      "9  2003-01-01      19.2828520\n",
+      "10 2003-04-01      20.5321091\n",
+      "11 2003-07-01      23.7161261\n",
+      "12 2003-10-01      25.3291868\n",
+      "13 2004-01-01      25.4441372\n",
+      "14 2004-04-01      26.6743983\n",
+      "15 2004-07-01      28.4701130\n",
+      "16 2004-10-01      30.2651752\n",
+      "17 2005-01-01      31.7642444\n",
+      "18 2005-04-01      31.5552098\n",
+      "19 2005-07-01      35.2994757\n",
+      "20 2005-10-01      41.2263581\n",
+      "21 2006-01-01      47.1939634\n",
+      "22 2006-04-01      72.2233454\n",
+      "23 2006-07-01      78.2391795\n",
+      "24 2006-10-01       2.2997041\n",
+      "25 2007-01-01       0.5381803\n",
+      "26 2007-04-01       7.7181437\n",
+      "27 2007-07-01       4.3531106\n",
+      "28 2007-10-01       6.4741528\n",
+      "29 2008-01-01       9.6133425\n",
+      "30 2008-04-01      11.3499456\n",
+      "31 2008-07-01       5.5449965\n",
+      "32 2008-10-01      36.6527910\n",
+      "33 2009-01-01      28.5021354\n",
+      "34 2009-04-01      36.0479221\n",
+      "35 2009-07-01      49.9044333\n",
+      "36 2009-10-01      62.6653687\n",
+      "37 2010-01-01      73.2650080\n",
+      "38 2010-04-01      78.0720108\n",
+      "39 2010-07-01      76.2052788\n",
+      "40 2010-10-01       7.4050045\n",
+      "41 2011-01-01      12.1817367\n",
+      "42 2011-04-01      10.3296393\n",
+      "43 2011-07-01      10.2023237\n",
+      "44 2011-10-01      77.0140199\n",
+      "45 2012-01-01       2.4304804\n",
+      "46 2012-04-01      75.6979969\n",
+      "47 2012-07-01      70.8120108\n",
+      "48 2012-10-01      72.6282165\n",
+      "49 2013-01-01      80.0741309\n",
+      "50 2013-04-01      67.8102037\n",
+      "51 2013-07-01      67.3349683\n",
+      "52 2013-10-01      68.3627564\n",
+      "53 2014-01-01      63.7719611\n",
+      "54 2014-04-01      60.7969367\n",
+      "55 2014-07-01      64.8307938\n",
+      "56 2014-10-01      57.4430368\n",
+      "57 2015-01-01      47.1654142\n",
+      "58 2015-04-01      43.5703428\n",
+      "59 2015-07-01      39.5923272\n",
+      "60 2015-10-01      33.8622043\n",
+      "61 2016-01-01      33.0727110\n",
+      "62 2016-04-01      37.2616804\n",
+      "63 2016-07-01      38.6629851\n",
+      "64 2016-10-01      43.4000915\n",
+      "65 2017-01-01      50.6654365\n",
+      "66 2017-04-01      43.8858151\n",
+      "67 2017-07-01      57.0926819\n",
+      "68 2017-10-01      60.7627909\n",
+      "69 2018-01-01      66.1307098\n",
+      "70 2018-04-01      62.6905159\n",
+      "71 2018-07-01      54.5286840\n",
+      "72 2018-10-01      52.9521056\n",
+      "73 2019-01-01      54.6663106\n",
+      "74 2019-04-01      54.6814161\n",
+      "75 2019-07-01      53.7982243\n",
+      "76 2019-10-01      51.9784111\n",
+      "77 2020-01-01      46.4667939\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i three_x\n",
+    "\n",
+    "three_x_index_metal_r <- three_x[2]\n",
+    "three_x_index_metal_r <- ts(three_x_index_metal_r, start = 2001, end = 2020, frequency =4)\n",
+    "three_x_index_metal_r <-  as.data.frame(as_tibble(seas(three_x_index_metal_r, x11= \"\",)))\n",
+    "three_x_index_metal_r <-  three_x_index_metal_r[-c(3:7)]\n",
+    "colnames(three_x_index_metal_r)[1] = \"Date\"\n",
+    "colnames(three_x_index_metal_r)[2] = \"index_metal_sea\"\n",
+    "print(three_x_index_metal_r)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 54,
+   "id": "671061a7",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date index_precious_sea\n",
+      "1  2001-01-01         22.2573958\n",
+      "2  2001-04-01         22.2010488\n",
+      "3  2001-07-01         16.9887407\n",
+      "4  2001-10-01         14.5232153\n",
+      "5  2002-01-01         16.2559967\n",
+      "6  2002-04-01         19.3102584\n",
+      "7  2002-07-01         15.9198290\n",
+      "8  2002-10-01         17.4400953\n",
+      "9  2003-01-01         19.2828520\n",
+      "10 2003-04-01         20.5321091\n",
+      "11 2003-07-01         23.7161261\n",
+      "12 2003-10-01         25.3291868\n",
+      "13 2004-01-01         25.4441372\n",
+      "14 2004-04-01         26.6743983\n",
+      "15 2004-07-01         28.4701130\n",
+      "16 2004-10-01         30.2651752\n",
+      "17 2005-01-01         31.7642444\n",
+      "18 2005-04-01         31.5552098\n",
+      "19 2005-07-01         35.2994757\n",
+      "20 2005-10-01         41.2263581\n",
+      "21 2006-01-01         47.1939634\n",
+      "22 2006-04-01         72.2233454\n",
+      "23 2006-07-01         78.2391795\n",
+      "24 2006-10-01          2.2997041\n",
+      "25 2007-01-01          0.5381803\n",
+      "26 2007-04-01          7.7181437\n",
+      "27 2007-07-01          4.3531106\n",
+      "28 2007-10-01          6.4741528\n",
+      "29 2008-01-01          9.6133425\n",
+      "30 2008-04-01         11.3499456\n",
+      "31 2008-07-01          5.5449965\n",
+      "32 2008-10-01         36.6527910\n",
+      "33 2009-01-01         28.5021354\n",
+      "34 2009-04-01         36.0479221\n",
+      "35 2009-07-01         49.9044333\n",
+      "36 2009-10-01         62.6653687\n",
+      "37 2010-01-01         73.2650080\n",
+      "38 2010-04-01         78.0720108\n",
+      "39 2010-07-01         76.2052788\n",
+      "40 2010-10-01          7.4050045\n",
+      "41 2011-01-01         12.1817367\n",
+      "42 2011-04-01         10.3296393\n",
+      "43 2011-07-01         10.2023237\n",
+      "44 2011-10-01         77.0140199\n",
+      "45 2012-01-01          2.4304804\n",
+      "46 2012-04-01         75.6979969\n",
+      "47 2012-07-01         70.8120108\n",
+      "48 2012-10-01         72.6282165\n",
+      "49 2013-01-01         80.0741309\n",
+      "50 2013-04-01         67.8102037\n",
+      "51 2013-07-01         67.3349683\n",
+      "52 2013-10-01         68.3627564\n",
+      "53 2014-01-01         63.7719611\n",
+      "54 2014-04-01         60.7969367\n",
+      "55 2014-07-01         64.8307938\n",
+      "56 2014-10-01         57.4430368\n",
+      "57 2015-01-01         47.1654142\n",
+      "58 2015-04-01         43.5703428\n",
+      "59 2015-07-01         39.5923272\n",
+      "60 2015-10-01         33.8622043\n",
+      "61 2016-01-01         33.0727110\n",
+      "62 2016-04-01         37.2616804\n",
+      "63 2016-07-01         38.6629851\n",
+      "64 2016-10-01         43.4000915\n",
+      "65 2017-01-01         50.6654365\n",
+      "66 2017-04-01         43.8858151\n",
+      "67 2017-07-01         57.0926819\n",
+      "68 2017-10-01         60.7627909\n",
+      "69 2018-01-01         66.1307098\n",
+      "70 2018-04-01         62.6905159\n",
+      "71 2018-07-01         54.5286840\n",
+      "72 2018-10-01         52.9521056\n",
+      "73 2019-01-01         54.6663106\n",
+      "74 2019-04-01         54.6814161\n",
+      "75 2019-07-01         53.7982243\n",
+      "76 2019-10-01         51.9784111\n",
+      "77 2020-01-01         46.4667939\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i three_x\n",
+    "\n",
+    "three_x_index_precious_r <- three_x[2]\n",
+    "three_x_index_precious_r <- ts(three_x_index_precious_r, start = 2001, end = 2020, frequency =4)\n",
+    "three_x_index_precious_r <-  as.data.frame(as_tibble(seas(three_x_index_precious_r, x11= \"\",)))\n",
+    "three_x_index_precious_r <-  three_x_index_precious_r[-c(3:7)]\n",
+    "colnames(three_x_index_precious_r)[1] = \"Date\"\n",
+    "colnames(three_x_index_precious_r)[2] = \"index_precious_sea\"\n",
+    "print(three_x_index_precious_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "aa2ee190",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors non-opec supply change: del_supply_nonopec\n",
+    "This data is in quarterly format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 55,
+   "id": "c9107623",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            del_supply_nonopec\n",
+      "Date                          \n",
+      "2001-01-01                0.72\n",
+      "2001-04-01                0.48\n",
+      "2001-07-01                0.59\n",
+      "2001-10-01                0.64\n",
+      "2002-01-01                0.80\n",
+      "...                        ...\n",
+      "2019-10-01                1.84\n",
+      "2020-01-01                2.45\n",
+      "2020-04-01               -3.94\n",
+      "2020-07-01               -3.88\n",
+      "2020-10-01               -4.61\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "del_supply_nonopec = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'del_nonopec_supply', usecols= \"A, B\"))\n",
+    "del_supply_nonopecsupply = del_supply_nonopec.dropna()\n",
+    "del_supply_nonopec['Date'] = pd.to_datetime(del_supply_nonopec['Date'], format = \"mixed\")\n",
+    "del_supply_nonopec = del_supply_nonopec.set_index('Date')\n",
+    "del_supply_nonopec.rename(columns = {\"non-OPEC Production change\": \"del_supply_nonopec\"}, inplace = True)\n",
+    "del_supply_nonopec = del_supply_nonopec['2001-01-01' : '2020-12-31']\n",
+    "print(del_supply_nonopec)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 56,
+   "id": "d07d787e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date del_supply_nonopec_sea\n",
+      "1  2001-01-01             0.89337006\n",
+      "2  2001-04-01             0.20299863\n",
+      "3  2001-07-01             0.62384077\n",
+      "4  2001-10-01             0.70643870\n",
+      "5  2002-01-01             0.97886550\n",
+      "6  2002-04-01             1.27805106\n",
+      "7  2002-07-01             0.78275214\n",
+      "8  2002-10-01             0.79825216\n",
+      "9  2003-01-01             1.31299273\n",
+      "10 2003-04-01             0.01710566\n",
+      "11 2003-07-01             1.33465864\n",
+      "12 2003-10-01             1.66313169\n",
+      "13 2004-01-01             1.34894735\n",
+      "14 2004-04-01             1.46919683\n",
+      "15 2004-07-01             0.92936445\n",
+      "16 2004-10-01             0.52164498\n",
+      "17 2005-01-01             0.28445154\n",
+      "18 2005-04-01             0.31987048\n",
+      "19 2005-07-01            -0.27163155\n",
+      "20 2005-10-01            -0.73607636\n",
+      "21 2006-01-01            -0.03375998\n",
+      "22 2006-04-01            -0.63593351\n",
+      "23 2006-07-01             1.26740101\n",
+      "24 2006-10-01             1.04128926\n",
+      "25 2007-01-01             0.68638726\n",
+      "26 2007-04-01             0.42383631\n",
+      "27 2007-07-01            -0.10814792\n",
+      "28 2007-10-01             0.10788880\n",
+      "29 2008-01-01             0.12941162\n",
+      "30 2008-04-01            -0.14816017\n",
+      "31 2008-07-01            -0.06876876\n",
+      "32 2008-10-01            -0.02719358\n",
+      "33 2009-01-01             0.31166277\n",
+      "34 2009-04-01             0.46720159\n",
+      "35 2009-07-01             1.40717147\n",
+      "36 2009-10-01             1.34344734\n",
+      "37 2010-01-01             1.67866319\n",
+      "38 2010-04-01             1.85907040\n",
+      "39 2010-07-01             1.70067411\n",
+      "40 2010-10-01             1.73704979\n",
+      "41 2011-01-01             0.96989187\n",
+      "42 2011-04-01             0.23584970\n",
+      "43 2011-07-01             0.27097332\n",
+      "44 2011-10-01             0.27487436\n",
+      "45 2012-01-01             0.84669997\n",
+      "46 2012-04-01             0.69756225\n",
+      "47 2012-07-01             0.52279727\n",
+      "48 2012-10-01             1.16798390\n",
+      "49 2013-01-01             0.59058090\n",
+      "50 2013-04-01             1.57311823\n",
+      "51 2013-07-01             2.36299844\n",
+      "52 2013-10-01             1.96016401\n",
+      "53 2014-01-01             2.31087769\n",
+      "54 2014-04-01             2.62574648\n",
+      "55 2014-07-01             2.34710213\n",
+      "56 2014-10-01             2.80020942\n",
+      "57 2015-01-01             2.41682345\n",
+      "58 2015-04-01             1.61557221\n",
+      "59 2015-07-01             1.40728495\n",
+      "60 2015-10-01             0.42219308\n",
+      "61 2016-01-01            -0.08663356\n",
+      "62 2016-04-01            -0.89463937\n",
+      "63 2016-07-01            -1.14170065\n",
+      "64 2016-10-01            -0.51763467\n",
+      "65 2017-01-01            -0.03349848\n",
+      "66 2017-04-01             0.95772517\n",
+      "67 2017-07-01             1.05152520\n",
+      "68 2017-10-01             1.03761721\n",
+      "69 2018-01-01             1.70451759\n",
+      "70 2018-04-01             2.58547983\n",
+      "71 2018-07-01             3.48633490\n",
+      "72 2018-10-01             3.53912868\n",
+      "73 2019-01-01             2.29213287\n",
+      "74 2019-04-01             2.12916272\n",
+      "75 2019-07-01             1.54459985\n",
+      "76 2019-10-01             1.85482581\n",
+      "77 2020-01-01             2.39113981\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i del_supply_nonopec\n",
+    "\n",
+    "del_supply_nonopec_r <- ts(del_supply_nonopec, start = 2001, end = 2020, frequency =4)\n",
+    "del_supply_nonopec_r <-  as.data.frame(as_tibble(seas(del_supply_nonopec_r, x11= \"\",)))\n",
+    "del_supply_nonopec_r <-  del_supply_nonopec_r[-c(3:7)]\n",
+    "colnames(del_supply_nonopec_r)[1] = \"Date\"\n",
+    "colnames(del_supply_nonopec_r)[2] = \"del_supply_nonopec_sea\"\n",
+    "print(del_supply_nonopec_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "16b258a3",
+   "metadata": {},
+   "source": [
+    "## Preprocessing 2 predictors at once: capacity change nonopec, world gdp\n",
+    "These variables are in quarterly format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 57,
+   "id": "f9f08dae",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            del_cap_per  del_world_gdp_per\n",
+      "Date                                      \n",
+      "2001-01-01         1.15               3.40\n",
+      "2001-04-01         0.85               2.60\n",
+      "2001-07-01         0.98               2.10\n",
+      "2001-10-01         1.04               1.80\n",
+      "2002-01-01         0.84               2.19\n",
+      "...                 ...                ...\n",
+      "2019-10-01         0.58               2.42\n",
+      "2020-01-01         1.45              -1.42\n",
+      "2020-04-01        -4.93              -8.45\n",
+      "2020-07-01        -4.35              -2.09\n",
+      "2020-10-01        -4.69              -0.22\n",
+      "\n",
+      "[80 rows x 2 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "two_x_2 = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'capacity', usecols= \"A, C, D\"))\n",
+    "two_x_2 = two_x_2.dropna()\n",
+    "two_x_2['Date'] = pd.to_datetime(two_x_2['Date'], format =\"mixed\")\n",
+    "two_x_2 = two_x_2.set_index('Date')\n",
+    "two_x_2.rename(columns = {\"Capacity percent change\": \"del_cap_per\", \"World GDP Change\": \"del_world_gdp_per\"}, inplace = True)\n",
+    "two_x_2 = two_x_2['2001-01-01' : '2020-12-31']\n",
+    "print(two_x_2)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 58,
+   "id": "252489b0",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date del_cap_per_sea\n",
+      "1  2001-01-01      1.08709771\n",
+      "2  2001-04-01      0.54368986\n",
+      "3  2001-07-01      1.19535832\n",
+      "4  2001-10-01      0.95939858\n",
+      "5  2002-01-01      1.18842473\n",
+      "6  2002-04-01      1.48793820\n",
+      "7  2002-07-01      0.59264199\n",
+      "8  2002-10-01      0.07991948\n",
+      "9  2003-01-01     -1.97546714\n",
+      "10 2003-04-01     -4.36795427\n",
+      "11 2003-07-01     -1.49609715\n",
+      "12 2003-10-01      1.08381221\n",
+      "13 2004-01-01      3.69575982\n",
+      "14 2004-04-01      5.07373334\n",
+      "15 2004-07-01      3.41479073\n",
+      "16 2004-10-01      1.52274411\n",
+      "17 2005-01-01      1.23037164\n",
+      "18 2005-04-01      1.74614421\n",
+      "19 2005-07-01      1.23168857\n",
+      "20 2005-10-01      0.49775587\n",
+      "21 2006-01-01      0.03606951\n",
+      "22 2006-04-01     -0.87522879\n",
+      "23 2006-07-01      1.49846667\n",
+      "24 2006-10-01      1.46858812\n",
+      "25 2007-01-01      0.93585769\n",
+      "26 2007-04-01      0.77825356\n",
+      "27 2007-07-01      0.08696961\n",
+      "28 2007-10-01      0.44359545\n",
+      "29 2008-01-01      1.03315418\n",
+      "30 2008-04-01      0.67564336\n",
+      "31 2008-07-01      0.80259161\n",
+      "32 2008-10-01      0.52287136\n",
+      "33 2009-01-01      0.40444410\n",
+      "34 2009-04-01      0.60511240\n",
+      "35 2009-07-01      2.83317103\n",
+      "36 2009-10-01      3.79440759\n",
+      "37 2010-01-01      4.15088205\n",
+      "38 2010-04-01      4.36427320\n",
+      "39 2010-07-01      3.08967341\n",
+      "40 2010-10-01      2.27247681\n",
+      "41 2011-01-01      0.68819624\n",
+      "42 2011-04-01     -1.72908289\n",
+      "43 2011-07-01     -1.18908477\n",
+      "44 2011-10-01     -0.64374306\n",
+      "45 2012-01-01      0.39915712\n",
+      "46 2012-04-01      1.66493296\n",
+      "47 2012-07-01      1.22546376\n",
+      "48 2012-10-01      0.73305476\n",
+      "49 2013-01-01      0.38070148\n",
+      "50 2013-04-01      0.84315054\n",
+      "51 2013-07-01      0.97005659\n",
+      "52 2013-10-01      0.63461274\n",
+      "53 2014-01-01      1.62069961\n",
+      "54 2014-04-01      1.67377677\n",
+      "55 2014-07-01      2.75642301\n",
+      "56 2014-10-01      4.20938798\n",
+      "57 2015-01-01      3.01284494\n",
+      "58 2015-04-01      2.56616290\n",
+      "59 2015-07-01      2.20421290\n",
+      "60 2015-10-01      1.18084352\n",
+      "61 2016-01-01      0.84127151\n",
+      "62 2016-04-01     -0.26054525\n",
+      "63 2016-07-01     -0.99132731\n",
+      "64 2016-10-01      0.29417728\n",
+      "65 2017-01-01      0.62470629\n",
+      "66 2017-04-01      1.75402407\n",
+      "67 2017-07-01      2.32658282\n",
+      "68 2017-10-01      1.79858423\n",
+      "69 2018-01-01      1.67928155\n",
+      "70 2018-04-01      2.11433986\n",
+      "71 2018-07-01      2.31943565\n",
+      "72 2018-10-01      1.87411631\n",
+      "73 2019-01-01      1.36338152\n",
+      "74 2019-04-01      1.05585034\n",
+      "75 2019-07-01     -0.70498804\n",
+      "76 2019-10-01      0.63478207\n",
+      "77 2020-01-01      1.23564229\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i two_x_2\n",
+    "\n",
+    "two_x_2_del_cap_per_r <- two_x_2[1]\n",
+    "two_x_2_del_cap_per_r <- ts(two_x_2_del_cap_per_r, start = 2001, end = 2020, frequency =4)\n",
+    "two_x_2_del_cap_per_r <-  as.data.frame(as_tibble(seas(two_x_2_del_cap_per_r, x11= \"\",)))\n",
+    "two_x_2_del_cap_per_r <-  two_x_2_del_cap_per_r[-c(3:7)]\n",
+    "colnames(two_x_2_del_cap_per_r)[1] = \"Date\"\n",
+    "colnames(two_x_2_del_cap_per_r)[2] = \"del_cap_per_sea\"\n",
+    "print(two_x_2_del_cap_per_r)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 59,
+   "id": "46789f3e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date del_world_gdp_per_sea\n",
+      "1  2001-01-01            1.08709771\n",
+      "2  2001-04-01            0.54368986\n",
+      "3  2001-07-01            1.19535832\n",
+      "4  2001-10-01            0.95939858\n",
+      "5  2002-01-01            1.18842473\n",
+      "6  2002-04-01            1.48793820\n",
+      "7  2002-07-01            0.59264199\n",
+      "8  2002-10-01            0.07991948\n",
+      "9  2003-01-01           -1.97546714\n",
+      "10 2003-04-01           -4.36795427\n",
+      "11 2003-07-01           -1.49609715\n",
+      "12 2003-10-01            1.08381221\n",
+      "13 2004-01-01            3.69575982\n",
+      "14 2004-04-01            5.07373334\n",
+      "15 2004-07-01            3.41479073\n",
+      "16 2004-10-01            1.52274411\n",
+      "17 2005-01-01            1.23037164\n",
+      "18 2005-04-01            1.74614421\n",
+      "19 2005-07-01            1.23168857\n",
+      "20 2005-10-01            0.49775587\n",
+      "21 2006-01-01            0.03606951\n",
+      "22 2006-04-01           -0.87522879\n",
+      "23 2006-07-01            1.49846667\n",
+      "24 2006-10-01            1.46858812\n",
+      "25 2007-01-01            0.93585769\n",
+      "26 2007-04-01            0.77825356\n",
+      "27 2007-07-01            0.08696961\n",
+      "28 2007-10-01            0.44359545\n",
+      "29 2008-01-01            1.03315418\n",
+      "30 2008-04-01            0.67564336\n",
+      "31 2008-07-01            0.80259161\n",
+      "32 2008-10-01            0.52287136\n",
+      "33 2009-01-01            0.40444410\n",
+      "34 2009-04-01            0.60511240\n",
+      "35 2009-07-01            2.83317103\n",
+      "36 2009-10-01            3.79440759\n",
+      "37 2010-01-01            4.15088205\n",
+      "38 2010-04-01            4.36427320\n",
+      "39 2010-07-01            3.08967341\n",
+      "40 2010-10-01            2.27247681\n",
+      "41 2011-01-01            0.68819624\n",
+      "42 2011-04-01           -1.72908289\n",
+      "43 2011-07-01           -1.18908477\n",
+      "44 2011-10-01           -0.64374306\n",
+      "45 2012-01-01            0.39915712\n",
+      "46 2012-04-01            1.66493296\n",
+      "47 2012-07-01            1.22546376\n",
+      "48 2012-10-01            0.73305476\n",
+      "49 2013-01-01            0.38070148\n",
+      "50 2013-04-01            0.84315054\n",
+      "51 2013-07-01            0.97005659\n",
+      "52 2013-10-01            0.63461274\n",
+      "53 2014-01-01            1.62069961\n",
+      "54 2014-04-01            1.67377677\n",
+      "55 2014-07-01            2.75642301\n",
+      "56 2014-10-01            4.20938798\n",
+      "57 2015-01-01            3.01284494\n",
+      "58 2015-04-01            2.56616290\n",
+      "59 2015-07-01            2.20421290\n",
+      "60 2015-10-01            1.18084352\n",
+      "61 2016-01-01            0.84127151\n",
+      "62 2016-04-01           -0.26054525\n",
+      "63 2016-07-01           -0.99132731\n",
+      "64 2016-10-01            0.29417728\n",
+      "65 2017-01-01            0.62470629\n",
+      "66 2017-04-01            1.75402407\n",
+      "67 2017-07-01            2.32658282\n",
+      "68 2017-10-01            1.79858423\n",
+      "69 2018-01-01            1.67928155\n",
+      "70 2018-04-01            2.11433986\n",
+      "71 2018-07-01            2.31943565\n",
+      "72 2018-10-01            1.87411631\n",
+      "73 2019-01-01            1.36338152\n",
+      "74 2019-04-01            1.05585034\n",
+      "75 2019-07-01           -0.70498804\n",
+      "76 2019-10-01            0.63478207\n",
+      "77 2020-01-01            1.23564229\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i two_x_2\n",
+    "\n",
+    "two_x_2_del_world_gdp_per_r <- two_x_2[1]\n",
+    "two_x_2_del_world_gdp_per_r <- ts(two_x_2_del_world_gdp_per_r, start = 2001, end = 2020, frequency =4)\n",
+    "two_x_2_del_world_gdp_per_r <-  as.data.frame(as_tibble(seas(two_x_2_del_world_gdp_per_r, x11= \"\",)))\n",
+    "two_x_2_del_world_gdp_per_r <-  two_x_2_del_world_gdp_per_r[-c(3:7)]\n",
+    "colnames(two_x_2_del_world_gdp_per_r)[1] = \"Date\"\n",
+    "colnames(two_x_2_del_world_gdp_per_r)[2] = \"del_world_gdp_per_sea\"\n",
+    "print(two_x_2_del_world_gdp_per_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "fb5f81a7",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors- change in saudi supply: del_supply_saudi\n",
+    "This data is in quarterly format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 60,
+   "id": "7a93cb2d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            del_supply_saudi\n",
+      "Date                        \n",
+      "2001-01-01              0.58\n",
+      "2001-04-01             -0.18\n",
+      "2001-07-01             -0.68\n",
+      "2001-10-01             -1.19\n",
+      "2002-01-01             -1.17\n",
+      "...                      ...\n",
+      "2019-10-01             -0.90\n",
+      "2020-01-01             -0.20\n",
+      "2020-04-01             -0.64\n",
+      "2020-07-01             -0.61\n",
+      "2020-10-01             -0.82\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "del_supply_saudi = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'saudi_production', usecols= \"A, C\"))\n",
+    "del_supply_saudi = del_supply_saudi.dropna()\n",
+    "del_supply_saudi['Date'] = pd.to_datetime(del_supply_saudi['Date'], format =\"mixed\")\n",
+    "del_supply_saudi = del_supply_saudi.set_index('Date')\n",
+    "del_supply_saudi.rename(columns = {\"Saudi Production Change\": \"del_supply_saudi\",}, inplace = True)\n",
+    "del_supply_saudi = del_supply_saudi['2001-01-01' : '2020-12-31']\n",
+    "print(del_supply_saudi)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 61,
+   "id": "b72038b5",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date del_supply_saudi_sea\n",
+      "1  2001-01-01           0.52685583\n",
+      "2  2001-04-01          -0.29882032\n",
+      "3  2001-07-01          -0.58578676\n",
+      "4  2001-10-01          -1.11894590\n",
+      "5  2002-01-01          -1.21822405\n",
+      "6  2002-04-01          -0.63867544\n",
+      "7  2002-07-01          -0.18042683\n",
+      "8  2002-10-01           0.42734850\n",
+      "9  2003-01-01           1.57767028\n",
+      "10 2003-04-01           1.59930095\n",
+      "11 2003-07-01           0.82671160\n",
+      "12 2003-10-01           0.56260493\n",
+      "13 2004-01-01          -0.32852712\n",
+      "14 2004-04-01          -0.43899026\n",
+      "15 2004-07-01           1.04508389\n",
+      "16 2004-10-01           1.00081785\n",
+      "17 2005-01-01           0.88410030\n",
+      "18 2005-04-01           0.72899706\n",
+      "19 2005-07-01           0.15664079\n",
+      "20 2005-10-01           0.02380728\n",
+      "21 2006-01-01          -0.10491067\n",
+      "22 2006-04-01          -0.43509454\n",
+      "23 2006-07-01          -0.35010874\n",
+      "24 2006-10-01          -0.70904855\n",
+      "25 2007-01-01          -0.77132077\n",
+      "26 2007-04-01          -0.65650788\n",
+      "27 2007-07-01          -0.50179105\n",
+      "28 2007-10-01           0.18269382\n",
+      "29 2008-01-01           0.53849917\n",
+      "30 2008-04-01           0.70472720\n",
+      "31 2008-07-01           0.92044302\n",
+      "32 2008-10-01          -0.01628723\n",
+      "33 2009-01-01          -1.14307512\n",
+      "34 2009-04-01          -1.19359528\n",
+      "35 2009-07-01          -1.16172746\n",
+      "36 2009-10-01          -0.66801116\n",
+      "37 2010-01-01           0.05168604\n",
+      "38 2010-04-01           0.02721232\n",
+      "39 2010-07-01          -0.21078363\n",
+      "40 2010-10-01          -0.03547901\n",
+      "41 2011-01-01           0.72464377\n",
+      "42 2011-04-01           0.97460196\n",
+      "43 2011-07-01           1.62862990\n",
+      "44 2011-10-01           1.48686528\n",
+      "45 2012-01-01           1.02246288\n",
+      "46 2012-04-01           0.71930747\n",
+      "47 2012-07-01           0.11506614\n",
+      "48 2012-10-01          -0.20372202\n",
+      "49 2013-01-01          -0.85926049\n",
+      "50 2013-04-01          -0.23958650\n",
+      "51 2013-07-01           0.21881080\n",
+      "52 2013-10-01           0.30561404\n",
+      "53 2014-01-01           0.67402850\n",
+      "54 2014-04-01           0.05774141\n",
+      "55 2014-07-01          -0.36871706\n",
+      "56 2014-10-01          -0.18453454\n",
+      "57 2015-01-01          -0.01849823\n",
+      "58 2015-04-01           0.64148316\n",
+      "59 2015-07-01           0.62793242\n",
+      "60 2015-10-01           0.47453292\n",
+      "61 2016-01-01           0.37549979\n",
+      "62 2016-04-01           0.06128105\n",
+      "63 2016-07-01           0.35087012\n",
+      "64 2016-10-01           0.39699639\n",
+      "65 2017-01-01          -0.25602778\n",
+      "66 2017-04-01          -0.22148408\n",
+      "67 2017-07-01          -0.37728071\n",
+      "68 2017-10-01          -0.46311177\n",
+      "69 2018-01-01           0.08726356\n",
+      "70 2018-04-01           0.13438917\n",
+      "71 2018-07-01           0.34354456\n",
+      "72 2018-10-01           0.60517587\n",
+      "73 2019-01-01          -0.15730686\n",
+      "74 2019-04-01          -0.24901350\n",
+      "75 2019-07-01          -1.05783601\n",
+      "76 2019-10-01          -0.92507507\n",
+      "77 2020-01-01          -0.25045052\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i del_supply_saudi\n",
+    "\n",
+    "del_supply_saudi_r <- ts(del_supply_saudi, start = 2001, end = 2020, frequency =4)\n",
+    "del_supply_saudi_r <-  as.data.frame(as_tibble(seas(del_supply_saudi_r, x11= \"\",)))\n",
+    "del_supply_saudi_r <-  del_supply_saudi_r[-c(3:7)]\n",
+    "colnames(del_supply_saudi_r)[1] = \"Date\"\n",
+    "colnames(del_supply_saudi_r)[2] = \"del_supply_saudi_sea\"\n",
+    "print(del_supply_saudi_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "dd7aad85",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors-  opec spare capacity: opec_spare_capacity\n",
+    "This data is in quarterly format"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 62,
+   "id": "31ab39aa",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            opec_spare_capacity\n",
+      "Date                           \n",
+      "2001-01-01                 3.63\n",
+      "2001-04-01                 4.65\n",
+      "2001-07-01                 4.44\n",
+      "2001-10-01                 5.21\n",
+      "2002-01-01                 6.10\n",
+      "...                         ...\n",
+      "2019-10-01                 2.07\n",
+      "2020-01-01                 2.78\n",
+      "2020-04-01                 5.49\n",
+      "2020-07-01                 6.98\n",
+      "2020-10-01                 6.22\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "opec_spare_capacity = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'opec_spare_capacity', usecols= \"A, C\"))\n",
+    "opec_spare_capacity = opec_spare_capacity.dropna()\n",
+    "opec_spare_capacity['Date'] = pd.to_datetime(opec_spare_capacity['Date'], format =\"mixed\")\n",
+    "opec_spare_capacity = opec_spare_capacity.set_index('Date')\n",
+    "opec_spare_capacity.rename(columns = {\"Spare Capacity\": \"opec_spare_capacity\",}, inplace = True)\n",
+    "opec_spare_capacity = opec_spare_capacity['2001-01-01' : '2020-12-31']\n",
+    "print(opec_spare_capacity)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 63,
+   "id": "3eaf1fd2",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date opec_spare_capacity_sea\n",
+      "1  2001-01-01               3.8956098\n",
+      "2  2001-04-01               4.4720646\n",
+      "3  2001-07-01               4.4941437\n",
+      "4  2001-10-01               5.0751301\n",
+      "5  2002-01-01               6.4185020\n",
+      "6  2002-04-01               6.4013446\n",
+      "7  2002-07-01               6.0098479\n",
+      "8  2002-10-01               4.4520351\n",
+      "9  2003-01-01               2.0835591\n",
+      "10 2003-04-01               1.3122587\n",
+      "11 2003-07-01               2.3294767\n",
+      "12 2003-10-01               1.9993252\n",
+      "13 2004-01-01               1.8491188\n",
+      "14 2004-04-01               1.5845261\n",
+      "15 2004-07-01               0.7469095\n",
+      "16 2004-10-01               0.6962043\n",
+      "17 2005-01-01               1.0488011\n",
+      "18 2005-04-01               0.9760332\n",
+      "19 2005-07-01               1.0272096\n",
+      "20 2005-10-01               1.0192403\n",
+      "21 2006-01-01               1.0509489\n",
+      "22 2006-04-01               1.2786497\n",
+      "23 2006-07-01               1.4850583\n",
+      "24 2006-10-01               2.0407671\n",
+      "25 2007-01-01               2.1387747\n",
+      "26 2007-04-01               2.1626983\n",
+      "27 2007-07-01               2.2929807\n",
+      "28 2007-10-01               1.6759449\n",
+      "29 2008-01-01               1.4100068\n",
+      "30 2008-04-01               1.3548784\n",
+      "31 2008-07-01               1.2598535\n",
+      "32 2008-10-01               2.0122657\n",
+      "33 2009-01-01               3.5681129\n",
+      "34 2009-04-01               3.7401413\n",
+      "35 2009-07-01               4.6983996\n",
+      "36 2009-10-01               4.8551108\n",
+      "37 2010-01-01               4.9495947\n",
+      "38 2010-04-01               5.3620720\n",
+      "39 2010-07-01               5.7259011\n",
+      "40 2010-10-01               5.2097726\n",
+      "41 2011-01-01               4.2891295\n",
+      "42 2011-04-01               3.8552539\n",
+      "43 2011-07-01               3.4305760\n",
+      "44 2011-10-01               3.2047617\n",
+      "45 2012-01-01               2.5579122\n",
+      "46 2012-04-01               2.5799406\n",
+      "47 2012-07-01               2.6666368\n",
+      "48 2012-10-01               2.7640456\n",
+      "49 2013-01-01               3.1441229\n",
+      "50 2013-04-01               2.7911885\n",
+      "51 2013-07-01               2.4538797\n",
+      "52 2013-10-01               2.5109498\n",
+      "53 2014-01-01               2.3538533\n",
+      "54 2014-04-01               2.5775438\n",
+      "55 2014-07-01               2.6636911\n",
+      "56 2014-10-01               2.3188681\n",
+      "57 2015-01-01               2.0870432\n",
+      "58 2015-04-01               1.5803323\n",
+      "59 2015-07-01               1.6365483\n",
+      "60 2015-10-01               1.6474122\n",
+      "61 2016-01-01               1.6112299\n",
+      "62 2016-04-01               1.5134147\n",
+      "63 2016-07-01               1.2857892\n",
+      "64 2016-10-01               1.2513828\n",
+      "65 2017-01-01               2.3233715\n",
+      "66 2017-04-01               2.1548112\n",
+      "67 2017-07-01               2.2337067\n",
+      "68 2017-10-01               2.3570812\n",
+      "69 2018-01-01               1.8062448\n",
+      "70 2018-04-01               1.6592674\n",
+      "71 2018-07-01               1.3784353\n",
+      "72 2018-10-01               1.0074377\n",
+      "73 2019-01-01               2.2074566\n",
+      "74 2019-04-01               2.2398873\n",
+      "75 2019-07-01               2.3269700\n",
+      "76 2019-10-01               2.2265119\n",
+      "77 2020-01-01               2.8258951\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i opec_spare_capacity\n",
+    "\n",
+    "opec_spare_capacity_r <- ts(opec_spare_capacity, start = 2001, end = 2020, frequency =4)\n",
+    "opec_spare_capacity_r <-  as.data.frame(as_tibble(seas(opec_spare_capacity_r, x11= \"\",)))\n",
+    "opec_spare_capacity_r <-  opec_spare_capacity_r[-c(3:7)]\n",
+    "colnames(opec_spare_capacity_r)[1] = \"Date\"\n",
+    "colnames(opec_spare_capacity_r)[2] = \"opec_spare_capacity_sea\"\n",
+    "print(opec_spare_capacity_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "ca09b39e",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors-  oecd inventory: oecd_inventory\n",
+    "This is a monthly data, we have to calculate the quaterly mean"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 64,
+   "id": "3b82bf96",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            oecd_inventory\n",
+      "Date                      \n",
+      "2001-01-01     3819.207000\n",
+      "2001-04-01     3890.611667\n",
+      "2001-07-01     3929.645333\n",
+      "2001-10-01     3963.919000\n",
+      "2002-01-01     3962.906333\n",
+      "...                    ...\n",
+      "2019-10-01     4413.825366\n",
+      "2020-01-01     4456.016624\n",
+      "2020-04-01     4736.158983\n",
+      "2020-07-01     4763.088421\n",
+      "2020-10-01     4630.883993\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "oecd_inventory = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'oecd_inventory', usecols= \"A, B\"))\n",
+    "oecd_inventory = oecd_inventory.dropna()\n",
+    "oecd_inventory['Date'] = pd.to_datetime(oecd_inventory['Date'], format =\"mixed\")\n",
+    "oecd_inventory = oecd_inventory.set_index('Date')\n",
+    "oecd_inventory = oecd_inventory.resample('QS').mean()\n",
+    "oecd_inventory = oecd_inventory['2001-01-01' : '2020-12-31']\n",
+    "print(oecd_inventory)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 65,
+   "id": "bb95d238",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date oecd_inventory_sea\n",
+      "1  2001-01-01           3865.995\n",
+      "2  2001-04-01           3890.157\n",
+      "3  2001-07-01           3895.076\n",
+      "4  2001-10-01           3951.387\n",
+      "5  2002-01-01           4001.717\n",
+      "6  2002-04-01           3986.876\n",
+      "7  2002-07-01           3936.663\n",
+      "8  2002-10-01           3889.460\n",
+      "9  2003-01-01           3842.681\n",
+      "10 2003-04-01           3893.131\n",
+      "11 2003-07-01           3957.243\n",
+      "12 2003-10-01           3970.773\n",
+      "13 2004-01-01           3983.933\n",
+      "14 2004-04-01           3975.366\n",
+      "15 2004-07-01           4006.655\n",
+      "16 2004-10-01           4047.088\n",
+      "17 2005-01-01           4068.151\n",
+      "18 2005-04-01           4123.670\n",
+      "19 2005-07-01           4115.476\n",
+      "20 2005-10-01           4142.071\n",
+      "21 2006-01-01           4165.278\n",
+      "22 2006-04-01           4154.742\n",
+      "23 2006-07-01           4213.074\n",
+      "24 2006-10-01           4224.966\n",
+      "25 2007-01-01           4186.772\n",
+      "26 2007-04-01           4167.444\n",
+      "27 2007-07-01           4154.085\n",
+      "28 2007-10-01           4119.699\n",
+      "29 2008-01-01           4131.935\n",
+      "30 2008-04-01           4117.482\n",
+      "31 2008-07-01           4148.503\n",
+      "32 2008-10-01           4214.400\n",
+      "33 2009-01-01           4299.564\n",
+      "34 2009-04-01           4300.387\n",
+      "35 2009-07-01           4300.867\n",
+      "36 2009-10-01           4282.469\n",
+      "37 2010-01-01           4282.038\n",
+      "38 2010-04-01           4296.495\n",
+      "39 2010-07-01           4289.836\n",
+      "40 2010-10-01           4290.718\n",
+      "41 2011-01-01           4256.014\n",
+      "42 2011-04-01           4226.741\n",
+      "43 2011-07-01           4183.943\n",
+      "44 2011-10-01           4166.812\n",
+      "45 2012-01-01           4192.273\n",
+      "46 2012-04-01           4189.311\n",
+      "47 2012-07-01           4214.300\n",
+      "48 2012-10-01           4219.780\n",
+      "49 2013-01-01           4228.225\n",
+      "50 2013-04-01           4214.309\n",
+      "51 2013-07-01           4207.150\n",
+      "52 2013-10-01           4190.426\n",
+      "53 2014-01-01           4165.222\n",
+      "54 2014-04-01           4193.134\n",
+      "55 2014-07-01           4238.062\n",
+      "56 2014-10-01           4285.454\n",
+      "57 2015-01-01           4336.384\n",
+      "58 2015-04-01           4417.088\n",
+      "59 2015-07-01           4466.762\n",
+      "60 2015-10-01           4558.240\n",
+      "61 2016-01-01           4627.077\n",
+      "62 2016-04-01           4646.913\n",
+      "63 2016-07-01           4665.414\n",
+      "64 2016-10-01           4650.662\n",
+      "65 2017-01-01           4669.763\n",
+      "66 2017-04-01           4622.930\n",
+      "67 2017-07-01           4551.349\n",
+      "68 2017-10-01           4475.443\n",
+      "69 2018-01-01           4413.000\n",
+      "70 2018-04-01           4383.743\n",
+      "71 2018-07-01           4388.058\n",
+      "72 2018-10-01           4424.613\n",
+      "73 2019-01-01           4429.834\n",
+      "74 2019-04-01           4441.227\n",
+      "75 2019-07-01           4459.418\n",
+      "76 2019-10-01           4434.269\n",
+      "77 2020-01-01           4470.038\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i oecd_inventory\n",
+    "\n",
+    "oecd_inventory_r <- ts(oecd_inventory, start = 2001, end = 2020, frequency =4)\n",
+    "oecd_inventory_r <-  as.data.frame(as_tibble(seas(oecd_inventory_r, x11= \"\",)))\n",
+    "oecd_inventory_r <-  oecd_inventory_r[-c(3:7)]\n",
+    "colnames(oecd_inventory_r)[1] = \"Date\"\n",
+    "colnames(oecd_inventory_r)[2] = \"oecd_inventory_sea\"\n",
+    "print(oecd_inventory_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "67508a97",
+   "metadata": {},
+   "source": [
+    "## Preprocessing the predictors-  change in world oil consumption - del_world_consump\n",
+    "This is a quarterly data"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 66,
+   "id": "08748cf6",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "            del_world_consump\n",
+      "Date                         \n",
+      "2001-01-01               0.75\n",
+      "2001-04-01              -0.14\n",
+      "2001-07-01               0.63\n",
+      "2001-10-01               1.48\n",
+      "2002-01-01               2.52\n",
+      "...                       ...\n",
+      "2019-10-01              -9.22\n",
+      "2020-01-01              -7.87\n",
+      "2020-04-01               0.27\n",
+      "2020-07-01              11.34\n",
+      "2020-10-01               6.49\n",
+      "\n",
+      "[80 rows x 1 columns]\n"
+     ]
+    }
+   ],
+   "source": [
+    "del_world_consump = pd.DataFrame(pd.read_excel(r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\Data raw.xlsx', sheet_name = 'world_consumption', usecols= \"A, B\"))\n",
+    "del_world_consump = del_world_consump.dropna()\n",
+    "del_world_consump['Date'] = pd.to_datetime(del_world_consump['Date'], format =\"mixed\")\n",
+    "del_world_consump = del_world_consump.set_index('Date')\n",
+    "del_world_consump.rename(columns = {\"World Consumption Change\": \"del_world_consump\",}, inplace = True)\n",
+    "del_world_consump = del_world_consump['2001-01-01' : '2020-12-31']\n",
+    "print(del_world_consump)"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 67,
+   "id": "d2b30110",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "         Date del_world_consump_sea\n",
+      "1  2001-01-01            0.64497017\n",
+      "2  2001-04-01           -0.04233482\n",
+      "3  2001-07-01            0.64109618\n",
+      "4  2001-10-01            1.47240784\n",
+      "5  2002-01-01            2.40826248\n",
+      "6  2002-04-01            2.84399543\n",
+      "7  2002-07-01            1.52138807\n",
+      "8  2002-10-01            1.94756249\n",
+      "9  2003-01-01            1.98664771\n",
+      "10 2003-04-01            3.20870390\n",
+      "11 2003-07-01            4.70810131\n",
+      "12 2003-10-01            4.20822958\n",
+      "13 2004-01-01            3.65468502\n",
+      "14 2004-04-01            3.14714431\n",
+      "15 2004-07-01            1.87950646\n",
+      "16 2004-10-01            1.37000828\n",
+      "17 2005-01-01           -0.49606257\n",
+      "18 2005-04-01            0.93641058\n",
+      "19 2005-07-01            0.78680649\n",
+      "20 2005-10-01            1.41812104\n",
+      "21 2006-01-01            2.11522157\n",
+      "22 2006-04-01            1.53796053\n",
+      "23 2006-07-01            2.30402110\n",
+      "24 2006-10-01            1.64232088\n",
+      "25 2007-01-01            2.29537588\n",
+      "26 2007-04-01            0.97334917\n",
+      "27 2007-07-01            0.80870137\n",
+      "28 2007-10-01           -0.99753736\n",
+      "29 2008-01-01           -3.41034584\n",
+      "30 2008-04-01           -3.00672991\n",
+      "31 2008-07-01           -2.20223367\n",
+      "32 2008-10-01           -0.14637963\n",
+      "33 2009-01-01            1.55638009\n",
+      "34 2009-04-01            2.52970170\n",
+      "35 2009-07-01            3.16034316\n",
+      "36 2009-10-01            3.47324409\n",
+      "37 2010-01-01            3.72130246\n",
+      "38 2010-04-01            2.29172546\n",
+      "39 2010-07-01            0.00585673\n",
+      "40 2010-10-01            0.34046139\n",
+      "41 2011-01-01            0.13885739\n",
+      "42 2011-04-01            1.03295894\n",
+      "43 2011-07-01            1.76479106\n",
+      "44 2011-10-01            0.82643034\n",
+      "45 2012-01-01            2.06823394\n",
+      "46 2012-04-01            1.90273248\n",
+      "47 2012-07-01            1.96906530\n",
+      "48 2012-10-01            1.72405013\n",
+      "49 2013-01-01            1.03792580\n",
+      "50 2013-04-01            1.65760141\n",
+      "51 2013-07-01            1.65184813\n",
+      "52 2013-10-01            1.60599574\n",
+      "53 2014-01-01            1.84444476\n",
+      "54 2014-04-01            1.56830287\n",
+      "55 2014-07-01            1.97434529\n",
+      "56 2014-10-01            2.57823298\n",
+      "57 2015-01-01            1.57584285\n",
+      "58 2015-04-01            2.02634018\n",
+      "59 2015-07-01            1.57618975\n",
+      "60 2015-10-01            0.91557553\n",
+      "61 2016-01-01            1.67345873\n",
+      "62 2016-04-01            1.21776988\n",
+      "63 2016-07-01            2.66362534\n",
+      "64 2016-10-01            2.20226243\n",
+      "65 2017-01-01            2.53899030\n",
+      "66 2017-04-01            1.92587397\n",
+      "67 2017-07-01            0.49263341\n",
+      "68 2017-10-01            1.29503094\n",
+      "69 2018-01-01            0.36528492\n",
+      "70 2018-04-01            0.50619228\n",
+      "71 2018-07-01            0.80490600\n",
+      "72 2018-10-01            1.03400009\n",
+      "73 2019-01-01            1.00256997\n",
+      "74 2019-04-01           -6.27110566\n",
+      "75 2019-07-01          -13.72042511\n",
+      "76 2019-10-01           -9.09845976\n",
+      "77 2020-01-01           -7.83607141\n"
+     ]
+    }
+   ],
+   "source": [
+    "%%R -i del_world_consump\n",
+    "\n",
+    "del_world_consump_r <- ts(del_world_consump, start = 2001, end = 2020, frequency =4)\n",
+    "del_world_consump_r <-  as.data.frame(as_tibble(seas(del_world_consump_r, x11= \"\",)))\n",
+    "del_world_consump_r <-  del_world_consump_r[-c(3:7)]\n",
+    "colnames(del_world_consump_r)[1] = \"Date\"\n",
+    "colnames(del_world_consump_r)[2] = \"del_world_consump_sea\"\n",
+    "print(del_world_consump_r)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "40216a4f",
+   "metadata": {},
+   "source": [
+    "## Merging all the dataframes to create our dataset: seasonality unadjusted, python output"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 68,
+   "id": "f38368f4",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "dat = pd.DataFrame(nm_oil_price.merge(wti_spot_price, on = 'Date').merge(brent_spot_price, on = 'Date').merge(dubai_price, on = 'Date')\\\n",
+    ".merge(index_china_gdp, on = 'Date').merge(index_us_gdp, on = 'Date').merge(index_cboe_volt, on = 'Date')\\\n",
+    ".merge(us_unemploy, on = 'Date').merge(index_ip_mining, on = 'Date').merge(two_x, on = 'Date').merge(index_cpi_us, on = 'Date')\\\n",
+    ".merge(three_x, on = 'Date').merge(del_supply_nonopec, on = 'Date').merge(two_x_2, on = 'Date').merge(del_supply_saudi, on = 'Date')\\\n",
+    ".merge(opec_spare_capacity, on = 'Date').merge(oecd_inventory, on = 'Date').merge(del_world_consump, on = 'Date'))\n",
+    "\n",
+    "file_name = r'C:\\Users\\asifr\\OneDrive - State of New Mexico\\Documents\\Project Oil Price\\dat.csv'\n",
+    "dat.to_csv(file_name)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "id": "167e5e1d",
+   "metadata": {
+    "tags": []
+   },
+   "source": [
+    "## Merging all the dataframes to create our dataset: seasonality adjusted, R output"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 69,
+   "id": "2b105c6e",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "%%R\n",
+    "\n",
+    "dat_sea <- merge(nm_oil_price_r, wti_spot_price_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, brent_spot_price_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, dubai_price_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_china_gdp_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_us_gdp_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_cboe_volt_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, us_unemploy_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_ip_mining_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_cpi_china_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, two_x_opec_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, two_x_non_opec_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, index_cpi_us_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, three_x_index_energy_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, three_x_index_metal_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, three_x_index_precious_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, del_supply_nonopec_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, two_x_2_del_cap_per_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, two_x_2_del_world_gdp_per_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, del_supply_saudi_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, opec_spare_capacity_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, oecd_inventory_r, by = \"Date\",  all.x = TRUE)\n",
+    "dat_sea <- merge(dat_sea, del_world_consump_r, by = \"Date\",  all.x = TRUE)\n",
+    "\n",
+    "# Using openxlsx\n",
+    "suppressPackageStartupMessages(library(openxlsx))\n",
+    "\n",
+    "OUT <- createWorkbook()\n",
+    "\n",
+    "## adding some worksheet to the workbook OUT\n",
+    "\n",
+    "addWorksheet(OUT, \"dat_sea\")\n",
+    "\n",
+    "## Writing the data to the worksheets\n",
+    "\n",
+    "writeData(OUT, sheet = \"dat_sea\", x = dat_sea)\n",
+    "\n",
+    "                      \n",
+    "# Exporting the file\n",
+    "\n",
+    "saveWorkbook(OUT, \"C:/Users/asifr/OneDrive - State of New Mexico/Documents/Project Oil Price/dat_sea.xlsx\", overwrite = TRUE)\n",
+    "\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.11.4"
+  },
+  "toc-autonumbering": true,
+  "toc-showcode": false,
+  "toc-showmarkdowntxt": false,
+  "toc-showtags": false
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}
